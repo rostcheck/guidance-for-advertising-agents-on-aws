@@ -1,0 +1,789 @@
+<!-- Active Participants Bar -->
+
+<div class="chat-section">
+
+  <div class="participants-bar">
+    <div class="participants-list" *ngIf="getActiveAgentParticipants().length > 0">
+      <div *ngFor="let participant of getActiveAgentParticipants()" class="participant-badge"
+        [ngStyle]="{'background-color':getAgentBGColor(participant.name), 'color':getAgentColor(participant.name), 'border':'1px solid ', 'border-color' : getBorderColor(participant.name), 'font-size':'0.9em'}"
+        [class.agent-hidden]="isAgentHidden(participant.name)">
+        <div class="participant-main">
+          <span class="participant-name">{{getAgentDisplayNameStr(participant.name)}}</span>
+          <span class="participant-count" [style.background]="getAgentColor(participant.name)"
+            [style.color]="'rgba(255, 255, 255, 0.8)'">{{participant.messageCount}}</span>
+        </div>
+        <div class="participant-actions">
+          <button class="visibility-toggle-btn" [style.background]="getAgentColor(participant.name)"
+            [style.color]="'rgba(255, 255, 255, 0.8)'" (click)="toggleAgentVisibility(participant.name)"
+            [title]="isAgentHidden(participant.name) ? 'Show messages from ' + getAgentDisplayNameStr(participant.name) : 'Hide messages from ' + getAgentDisplayNameStr(participant.name)">
+            <span class="material-icons">{{isAgentHidden(participant.name) ? 'visibility_off' : 'visibility'}}</span>
+          </button>
+          <button class="agent-sources-btn" [style.background]="getAgentColor(participant.name) "
+            [style.color]="'rgba(255, 255, 255, 0.8)'" (click)="showAgentSources(participant.name)"
+            [title]="'View data sources for ' + getAgentDisplayNameStr(participant.name)"
+            [disabled]="!hasAgentSources(participant.name)">
+            <span class="material-icons">library_books</span>
+          </button>
+          <button class="agent-info-btn" [style.background]="getAgentColor(participant.name)"
+            [style.color]="'rgba(255, 255, 255, 0.8)'" (click)="onAgentClick($event, participant)"
+            [title]="'View summary for ' + getAgentDisplayNameStr(participant.name)">
+            <span class="material-icons">info</span>
+          </button>
+          <!--<button class="agent-info-btn" 
+            [style.background]="getAgentColor(participant.name)"
+            [style.color]="'rgba(255, 255, 255, 0.8)'"
+            (click)="getEventsByActorAndSession(participant.name)"
+            [title]="'View summary for ' + getAgentDisplayNameStr(participant.name)">
+            <span class="material-icons">psychology</span>
+          </button>-->
+        </div>
+      </div>
+    </div>
+
+    <!-- Debug buttons (remove in production) -->
+    <!-- <div class="debug-buttons" style="padding: 8px; display: flex; gap: 8px;">
+      <button (click)="testVisualizationPopover()" style="padding: 4px 8px; font-size: 12px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer;">
+        Test Popover
+      </button>
+      <button (click)="debugAgentVisualizationState()" style="padding: 4px 8px; font-size: 12px; background: #10b981; color: white; border: none; border-radius: 4px; cursor: pointer;">
+        Debug State
+      </button>
+    </div> -->
+  </div>
+
+  <!--Scenarios Panel Component 
+    <app-scenarios
+      [scenarios]="scenarios || []"
+      [showScenariosPanel]="showScenariosPanel"
+      (scenarioSelected)="onScenarioSelected($event)"
+      (panelClosed)="closeScenariosPanel()">
+    </app-scenarios>-->
+  <!-- Scenarios Panel -->
+  <div class="scenarios-panel" *ngIf="scenarios.length > 0" [class.open]="showScenariosPanel"
+    [class.closed]="!showScenariosPanel">
+
+    <div class="scenarios-panel-content">
+      <div class="scenarios-header">
+        <h3>Example Scenarios</h3>
+        <p>Click any card to start a conversation</p>
+      </div>
+
+      <div class="scenarios-grid">
+        <div class="scenario-card" *ngFor="let scenario of scenarios; let i = index"
+          [class.flipping]="selectedScenarioIndex === i" (click)="selectScenario(scenario, i)">
+          <div class="card-inner">
+            <div class="card-front">
+              <div class="agent-type-indicator" *ngIf="scenario.agentType">
+                <span class="material-icons agent-icon" [style.color]="getAgentColorFromScenario(scenario)">
+                  {{ getAgentIcon(scenario.agentType) }}
+                </span>
+                <span class="agent-name" [style.color]="getAgentColorFromScenario(scenario)">
+                  {{ scenario.agentType }}
+                </span>
+              </div>
+              <h4>{{scenario.title}}</h4>
+              <p>{{scenario.description}}</p>
+              <span class="scenario-category">{{scenario.category}}</span>
+            </div>
+            <div class="card-back">
+              <div class="card-back-content">
+                <span class="material-icons">chat</span>
+                <p>Starting conversation...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scenarios-overlay" (click)="closeScenariosPanel()"></div>
+  </div>
+
+
+  <!-- Chat Interface -->
+  <div class="chat-container">
+
+
+    <!-- Chat Header with Export and Clear Buttons -->
+    <div class="chat-header" *ngIf="messages.length > 0">
+      <div class="chat-info">
+        <span class="message-count">{{messages.length}} message{{messages.length > 1 ? 's' : ''}}</span>
+        <span class="storage-info">{{getActiveAgentParticipants().length}} agent{{getActiveAgentParticipants().length >
+          1 ? 's' : ''}} participated</span>
+      </div>
+      <div class="chat-actions">
+        <button class="export-pdf-btn" (click)="showPdfExportOptions()" title="Export conversation to PDF">
+          <span class="material-icons">picture_as_pdf</span>
+          <span class="btn-text">Export PDF</span>
+        </button>
+        <button class="visibility-settings-btn" (click)="showVisibilitySettingsModal()"
+          title="Configure message visibility settings">
+          <span class="material-icons">list</span>
+          <span class="btn-text">Context</span>
+        </button>
+        <button class="clear-chat-btn" (click)="clearMessages()" title="Clear all messages">
+          <span class="material-icons">clear_all</span>
+          <span class="btn-text">Clear Chat</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="chat-messages" #messagesContainer>
+      <ng-container *ngFor="let message of sortedMessages; let i = index; trackBy: trackByMessageId">
+        <div *ngIf="!shouldHideMessage(message, i) && message.data?.contentType != 'tool-result'" class="message"
+          [class.user]="message.sender === 'user'" [class.agent]="message.sender === 'agent'"
+          [attr.data-agent]="message.agentName">
+
+
+
+          <div class="message-content">
+            <!-- Agent Name Header -->
+            <div class="agent-header"
+              *ngIf="message.sender === 'agent' && message.displayName && !message.data?.isWelcomeMessage">
+              <div class="agent-name" [style.color]="getAgentColor(message.agentName)"
+                [attr.data-content-type]="message.data?.contentType">
+                {{message.agentName}}
+              </div>
+              <div class="agent-timestamp">{{message.timestamp | date:'short'}}</div>
+            </div>
+            <!-- User messages - simple formatting -->
+            <div *ngIf="message.sender === 'user'">
+              <div class="message-text" [innerHTML]="formatMessage(message.text, message.agentName)"></div>
+
+              <!-- Display attached files for user messages -->
+              <div class="message-attachments" *ngIf="message.attachedFiles && message.attachedFiles.length > 0">
+                <div class="attachments-header">
+                  <span class="material-icons">attach_file</span>
+                  <span>{{message.attachedFiles.length}} file(s) attached</span>
+                </div>
+                <div class="attachments-list">
+                  <div class="attachment-item" *ngFor="let file of message.attachedFiles">
+                    <span class="material-icons file-icon">{{getFileIcon(file.type)}}</span>
+                    <div class="attachment-info">
+                      <span class="attachment-name">{{file.name}}</span>
+                      <span class="attachment-size">{{formatFileSize(file.size)}}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Agent messages - enhanced formatting with thinking/final content separation -->
+            <div *ngIf="message.sender === 'agent'">
+              <!-- Special handling for welcome message -->
+              <div *ngIf="message.data?.isWelcomeMessage" class="message-text welcome-message">
+                <p>Explore the possibilities of Agents on AWS for Advertising use cases. Select one of the
+                  <span class="primaryButton example-scenarios-link" (click)="toggleScenariosPanel()">example
+                    scenarios</span>
+                  or speak or type a question to get started.
+                </p>
+              </div>
+              <!-- Regular agent messages -->
+              <ng-container *ngIf="!message.data?.isWelcomeMessage &&  !isVisualizationChunk(message?.data?.messageType)">
+                <ng-container *ngTemplateOutlet="agentMessageTemplate; context: { message: message }"></ng-container>
+              </ng-container>
+            </div>
+
+            <div class="message-time" style="color: white;" *ngIf="message.sender === 'user'">
+              {{message.timestamp | date:'short'}}
+            </div>
+          </div>
+
+
+        </div>
+      </ng-container>
+
+      <!-- Loading indicator -->
+      <div class="message agent" *ngIf="isLoading">
+        <div class="message-content">
+          <div class="typing-indicator">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Agent Mention Typeahead -->
+    <app-agent-mention-typeahead #agentTypeahead [inputText]="currentMentionText" [isVisible]="showTypeahead"
+      [position]="typeaheadPosition" [availableAgentTypes]="getAvailableAgentTypes()"
+      (agentSelected)="onAgentSelected($event)" (closeTypeahead)="hideTypeahead()">
+    </app-agent-mention-typeahead>
+    <div class="chat-input">
+      <!-- Attached Files Display -->
+      <div class="attached-files" *ngIf="attachedFiles.length > 0">
+        <div class="attached-files-header">
+          <span class="material-icons">attach_file</span>
+          <span>{{attachedFiles.length}} file(s) attached</span>
+        </div>
+        <div class="attached-files-list">
+          <div class="attached-file" *ngFor="let file of attachedFiles; let i = index">
+            <div class="file-info">
+              <span class="file-name">{{file.name}}</span>
+              <span class="file-size">{{formatFileSize(file.size)}}</span>
+            </div>
+            <span class="material-icons file-icon">{{getFileIcon(file.type)}}</span>
+            <button class="remove-file-btn" (click)="removeAttachedFile(i)" title="Remove file">
+              <span class="material-icons">close</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="input-container" [class.drag-over]="isDragOver" (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
+
+        <!-- Drag and Drop Overlay -->
+        <div class="drag-overlay" *ngIf="isDragOver">
+          <div class="drag-overlay-content">
+            <span class="material-icons">cloud_upload</span>
+            <p>Drop files here to attach</p>
+          </div>
+        </div>
+
+        <textarea #messageInput [(ngModel)]="currentMessage" id="messageInput" (input)="onMessageInput($event)"
+          (keydown)="onMessageKeyDown($event)" (keypress)="onKeyPress($event)"
+          placeholder="Ask me about campaign optimization, audience analysis, or bidding strategies... (Type @ to mention a specific agent)"
+          [disabled]="isLoading" rows="1" class="message-textarea"></textarea>
+
+        <!-- Integrated Action Buttons -->
+        <div class="input-actions-integrated">
+          <button class="mic-btn-integrated" (click)="toggleVoiceRecording()" [disabled]="isLoading"
+            [class.recording]="isRecording" [title]="isRecording ? 'Stop voice recording' : 'Start voice recording'">
+            <span class="material-icons">{{isRecording ? 'stop' : 'mic'}}</span>
+          </button>
+
+          <button class="attach-btn-integrated" (click)="triggerFileSelect()" [disabled]="isLoading"
+            title="Attach files (PDF, images, documents, CSV, etc.)">
+            <span class="material-icons">attach_file</span>
+          </button>
+
+          <button class="send-btn-integrated" (click)="sendMessage(selectedAgentForMessage)"
+            [disabled]="(!currentMessage.trim() && attachedFiles.length === 0) || isLoading">
+            <span class="material-icons">send</span>
+          </button>
+        </div>
+
+
+
+
+      </div>
+
+      <!-- Hidden file input -->
+      <input #fileInput type="file" multiple [accept]="allowedFileTypes.join(',')" (change)="onFileSelected($event)"
+        style="display: none;">
+
+      <!-- Development Test Button (remove in production) -->
+      <!--  <button class="test-partial-json-btn" (click)="testJsonFormatting()"
+        style="position: fixed; top: 10px; right: 10px; z-index: 9999; background: #007bff; color: white; border: none; padding: 8px 12px; border-radius: 4px; font-size: 12px;">
+        Test JSON Format
+      </button> -->
+
+      <!-- Action buttons (hidden - now integrated) -->
+      <div class="input-actions">
+        <button class="btn btn-secondary attach-btn" (click)="triggerFileSelect()" [disabled]="isLoading"
+          title="Attach files (PDF, images, documents, CSV, etc.)">
+          <span class="material-icons">attach_file</span>
+        </button>
+
+        <button class="btn btn-primary send-btn" (click)="sendMessage(selectedAgentForMessage)"
+          [disabled]="(!currentMessage.trim() && attachedFiles.length === 0) || isLoading">
+          <span class="material-icons">send</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Template for agent messages with thinking/final content separation -->
+<ng-template #agentMessageTemplate let-message="message">
+  <ng-container *ngIf="getFormattedAgentMessage(message) as formatted">
+    <!-- Show thinking content if available -->
+    <div *ngIf="formatted.thinkingContent && formatted.thinkingContent.trim()" class="thinking-section"
+      [class.collapsed]="isThinkingCollapsed(message.id)">
+      <ng-container *ngIf="isThinkingCollapsed(message.id); else fullThinking">
+        <div class="thinking-content-preview">
+          <markdown class="thinking-content preview" [data]="getThinkingPreview(formatted.thinkingContent)"
+            ngPreserveWhitespaces>
+          </markdown>
+        </div>
+        <button class="thinking-toggle" (click)="toggleThinkingCollapsed(message.id)">
+          <span class="material-icons">expand_more</span>
+          Show more
+        </button>
+      </ng-container>
+      <ng-template #fullThinking>
+        <markdown class="thinking-content" [data]="formatted.thinkingContent" ngPreserveWhitespaces>
+        </markdown>
+        <button class="thinking-toggle" (click)="toggleThinkingCollapsed(message.id)">
+          <span class="material-icons">expand_less</span>
+          Show less
+        </button>
+      </ng-template>
+    </div>
+
+    <!-- Show final content using markdown component for proper formatting -->
+    <!-- Only show if there's actual content to display -->
+
+    <div *ngIf="formatted.finalContent && formatted.finalContent.trim()" class="message-text"
+      [class.thinking-in-progress]="formatted.isThinking"
+      [class.reasoning-content]="message.data?.contentType === 'reasoning'||message.data?.contentType === 'rationale'||message.data?.contentType === 'thinking'"
+      [class.tool-agent-response]="message.data?.contentType === 'tool-agent'"
+      [class.tool-result]="message.data?.contentType === 'tool-result'" [ngClass]="message.data?.messageClass"
+      [style.background]="message.data?.contentType === 'reasoning' ? (getAgentBGColor(message.agentName)) : null"
+      [ngStyle]="message.data?.contentType === 'reasoning' ? {'border':'4px solid', 'border-color': (getAgentColor(message.agentName))}:{}">
+      <markdown [data]="formatted.finalContent" ngPreserveWhitespaces>
+      </markdown>
+    </div>
+
+    <!-- Render visual data components if available -->
+    <div *ngIf="formatted.visualData" class="visual-components">
+
+      <!-- Metrics Visualization -->
+      <app-metrics-visualization *ngIf="formatted.visualData.metricData" [metricData]="formatted.visualData.metricData">
+      </app-metrics-visualization>
+
+      <!-- Allocations Visualization -->
+      <app-allocations-visualization *ngIf="formatted.visualData.channelAllocations"
+        [channelAllocations]="formatted.visualData.channelAllocations">
+      </app-allocations-visualization>
+
+      <!-- Segments Visualization -->
+      <app-segments-visualization *ngIf="formatted.visualData.segmentCards"
+        [segmentCards]="formatted.visualData.segmentCards">
+      </app-segments-visualization>
+
+      <!-- Channel Cards Visualization -->
+      <app-channels-visualization *ngIf="formatted.visualData.channelCards"
+        [channelCards]="formatted.visualData.channelCards">
+      </app-channels-visualization>
+
+      <!-- Creative Data Visualization -->
+      <app-creative-visualization *ngIf="formatted.visualData.creativeData"
+        [creativeData]="formatted.visualData.creativeData">
+      </app-creative-visualization>
+
+      <!-- Timeline Visualization -->
+      <app-timeline-visualization *ngIf="formatted.visualData.timelineData"
+        [timelineData]="formatted.visualData.timelineData">
+      </app-timeline-visualization>
+
+      <!-- Decision Tree Visualization
+      <app-decision-tree-visualization 
+        *ngIf="formatted.visualData.decisionTreeData"
+        [decisionTreeData]="formatted.visualData.decisionTreeData">
+      </app-decision-tree-visualization>-->
+
+      <!-- D3 Histogram Visualization -->
+      <app-histogram-visualization *ngIf="formatted.visualData.histogramData"
+        [data]="formatted.visualData.histogramData">
+      </app-histogram-visualization>
+
+      <!-- D3 Double Histogram Visualization -->
+      <app-double-histogram-visualization *ngIf="formatted.visualData.doubleHistogramData"
+        [data]="formatted.visualData.doubleHistogramData">
+      </app-double-histogram-visualization>
+
+      <!-- D3 Bar Chart Visualization -->
+      <app-bar-chart-visualization *ngIf="formatted.visualData.barChartData" [data]="formatted.visualData.barChartData">
+      </app-bar-chart-visualization>
+
+      <!-- D3 Donut Chart Visualization -->
+      <app-donut-chart-visualization *ngIf="formatted.visualData.donutChartData"
+        [data]="formatted.visualData.donutChartData">
+      </app-donut-chart-visualization>
+
+      <!-- Creative Image Gallery (for backward compatibility) -->
+      <div *ngIf="formatted.visualData.creativeData && (formatted.visualData.creativeData.imagery?.length > 0)"
+        class="creative-gallery-section">
+        <app-image-gallery [creativeData]="formatted.visualData.creativeData"
+          [title]="formatted.visualData.creativeData.title || 'Creative Asset Gallery'">
+        </app-image-gallery>
+      </div>
+    </div>
+
+    <!-- <div *ngIf="hasAgentSources(message.agentName)" class="message-sources">
+      <button class="sources-btn" (click)="showAgentSources(message.agentName)" title="View knowledge base sources">
+        <span class="material-icons">library_books</span>
+        <span class="sources-text">{{getSourceSummary(message).buttonText}}</span>
+      </button>
+    </div> -->
+  </ng-container>
+</ng-template>
+
+<!-- Agent Selection Modal -->
+<div class="agent-selector-overlay" *ngIf="showAgentSelector" (click)="cancelAgentSelection()">
+  <div class="agent-selector-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Select an Agent</h3>
+      <p>Which agent would you like to direct your message to?</p>
+    </div>
+
+    <div class="modal-content">
+      <div class="agent-options">
+        <div class="agent-option" *ngFor="let agent of availableAgents"
+          [class.selected]="selectedAgentForMessage?.agentType === agent.agent?.agentType"
+          (click)="selectAgentOption(agent.agent)">
+          <div (click)="selectAgentOption(agent.agent)" class="agent-option-header">
+            <span class="material-icons agent-icon" [style.color]="agent.color">
+              {{ agent.icon }}
+            </span>
+            <div class="agent-info" (click)="selectAgentOption(agent.agent)">
+              <h4 class="agent-name" [style.color]="agent.color">
+                {{ agent.displayName }}
+              </h4>
+              <p class="agent-description">{{ agent.description }}</p>
+            </div>
+          </div>
+          <div class="selection-indicator" *ngIf="selectedAgentForMessage?.agentType === agent.agent?.agentType">
+            <span class="material-icons">check_circle</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pending-message-preview" *ngIf="pendingMessage">
+        <h5>Message Preview:</h5>
+        <div class="message-preview">
+          <span class="agent-mention" [style.color]="getAgentColor(selectedAgentForMessage?.name)">
+            &#64;[{{ selectedAgentForMessage?.name }}]
+          </span>
+          {{ pendingMessage }}
+        </div>
+        <div class="attachment-count" *ngIf="pendingAttachedFiles.length > 0">
+          <span class="material-icons">attach_file</span>
+          {{ pendingAttachedFiles.length }} file(s) attached
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="cancelAgentSelection()">
+        Cancel
+      </button>
+      <button class="btn btn-primary" (click)="confirmAgentSelection()">
+        Send to {{ selectedAgentForMessage?.name }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Visualization Popover -->
+<app-visualization-popover [isVisible]="showVisualizationPopover" [displayName]="popoverAgent?.name||'unknown'"
+  [visualData]="popoverVisualData" (closePopover)="onCloseVisualizationPopover()">
+</app-visualization-popover>
+
+<!-- Agent Summary Modal -->
+<app-agent-summary-modal [summaryModalState]="summaryModalState" [summaryRetryCount]="summaryRetryCount"
+  [maxSummaryRetries]="maxSummaryRetries" (getAgentColor)="getAgentColor(popoverAgent?.name)"
+  (closeModal)="closeSummaryModal()" (retryGeneration)="retrySummaryGeneration()"
+  (showErrorHelp)="showErrorHelp($event)">
+</app-agent-summary-modal>
+
+<!-- PDF Export Options Modal -->
+<div class="export-modal-overlay" *ngIf="showExportOptions" (click)="hidePdfExportOptions()">
+  <div class="export-modal" (click)="$event.stopPropagation()">
+    <div class="export-modal-header">
+      <div class="modal-title">
+        <span class="material-icons">picture_as_pdf</span>
+        <h3>Export to PDF</h3>
+      </div>
+      <button class="close-btn" (click)="hidePdfExportOptions()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <div class="export-modal-content">
+      <!-- Export Statistics -->
+      <div class="export-stats" *ngIf="getExportStats() as stats">
+        <div class="stats-grid">
+          <div class="stat-item">
+            <span class="stat-value">{{stats.totalMessages}}</span>
+            <span class="stat-label">Total Messages</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">{{stats.agentCount}}</span>
+            <span class="stat-label">Agents</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">~{{stats.estimatedPages}}</span>
+            <span class="stat-label">Est. Pages</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">{{stats.estimatedSize}}</span>
+            <span class="stat-label">Est. Size</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Export Options -->
+      <div class="export-options">
+        <h4>Export Options</h4>
+
+        <!-- Document Settings -->
+        <div class="option-group">
+          <h5>Document Settings</h5>
+
+          <div class="option-row">
+            <label for="export-title">Title:</label>
+            <input id="export-title" type="text" [(ngModel)]="exportOptions.title" class="export-input"
+              placeholder="Document title">
+          </div>
+
+          <div class="option-row">
+            <label for="export-subtitle">Subtitle:</label>
+            <input id="export-subtitle" type="text" [(ngModel)]="exportOptions.subtitle" class="export-input"
+              placeholder="Optional subtitle">
+          </div>
+
+          <div class="option-row">
+            <label for="paper-size">Paper Size:</label>
+            <select id="paper-size" [(ngModel)]="exportOptions.paperSize" class="export-select">
+              <option value="a4">A4</option>
+              <option value="letter">Letter</option>
+            </select>
+          </div>
+
+          <div class="option-row">
+            <label for="orientation">Orientation:</label>
+            <select id="orientation" [(ngModel)]="exportOptions.orientation" class="export-select">
+              <option value="portrait">Portrait</option>
+              <option value="landscape">Landscape</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Content Settings -->
+        <div class="option-group">
+          <h5>Content Settings</h5>
+
+          <div class="option-checkbox">
+            <input type="checkbox" id="include-timestamps" [(ngModel)]="exportOptions.includeTimestamps">
+            <label for="include-timestamps">Include timestamps</label>
+          </div>
+
+          <div class="option-checkbox">
+            <input type="checkbox" id="include-visualizations" [(ngModel)]="exportOptions.includeVisualizations">
+            <label for="include-visualizations">Include charts and visualizations</label>
+          </div>
+
+          <div class="option-checkbox">
+            <input type="checkbox" id="include-thinking" [(ngModel)]="exportOptions.includeThinkingProcess">
+            <label for="include-thinking">Include agent thinking process</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview Info -->
+      <div class="export-preview">
+        <div class="preview-info">
+          <span class="material-icons">info</span>
+          <div class="preview-text">
+            <p>The PDF will include {{getExportStats().userMessages}} user messages and
+              {{getExportStats().agentMessages}} agent responses.</p>
+            <p *ngIf="getExportStats().totalMessages > 50" class="large-export-warning">
+              <span class="material-icons">warning</span>
+              Large conversation detected. Export may take longer and result in a large file.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Actions -->
+    <div class="export-modal-actions">
+      <button class="btn btn-secondary" (click)="hidePdfExportOptions()">
+        Cancel
+      </button>
+      <button class="btn btn-primary" (click)="exportChatToPdf()" [disabled]="isExportingPdf">
+        <span class="material-icons" *ngIf="!isExportingPdf">download</span>
+        <span class="material-icons rotating" *ngIf="isExportingPdf">hourglass_empty</span>
+        {{isExportingPdf ? 'Exporting...' : 'Export PDF'}}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Sources Modal -->
+<div class="sources-modal-overlay" *ngIf="showSourcesModal" (click)="closeSources()">
+  <div class="sources-modal" (click)="$event.stopPropagation()">
+    <div class="sources-modal-header">
+      <div class="modal-title">
+        <span class="material-icons">library_books</span>
+        <h3>Knowledge Base Sources</h3>
+      </div>
+      <button class="close-btn" (click)="closeSources()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <div class="sources-modal-content">
+      <div class="sources-count">
+        <span>{{currentSources.length}} source{{currentSources.length > 1 ? 's' : ''}} found</span>
+        <span *ngIf="currentSourceQueries.length > 1" class="queries-info">
+          from {{currentSourceQueries.length}} knowledge base queries
+        </span>
+      </div>
+
+      <!-- Show the queries that were made -->
+      <div *ngIf="currentSourceQueries.length > 1" class="queries-section">
+        <div class="queries-header">
+          <span class="material-icons">search</span>
+          <span>Knowledge Base Queries Made:</span>
+        </div>
+        <div class="query-item" *ngFor="let query of currentSourceQueries; let i = index">
+          <span class="query-number">{{i + 1}}.</span>
+          <span class="query-text">{{query}}</span>
+        </div>
+      </div>
+
+      <div class="sources-list">
+        <div class="source-item" *ngFor="let source of currentSources; let i = index">
+          <div class="source-header">
+            <div class="source-tool" *ngIf="source.agent">
+              <span class="tool-label">Retrieved by:</span>
+              <span class="tool-name">{{source.agent}}</span>
+              <span class="tool-label">from</span>
+              <span class="tool-name">{{getSourceFileName(source)}}</span>
+              
+            </div>
+            <div class="query-text">"{{source.query}}"</div>
+          </div>
+
+          <div class="source-content scenarios-list">
+            <!-- Search Query -->
+            <!-- Agent Response -->
+            <div class="source-section" *ngIf="source.output?.text">
+              <h4>Agent Response</h4>
+              <textarea oninput="auto_grow(this)" readonly class="response-text">{{source.output.text}}</textarea>
+            </div>
+
+            <!-- Knowledge Base Response (from citations) -->
+            <div class="source-section" *ngIf="source.citations && source.citations.length > 0">
+              <h4>Source Response</h4>
+              <textarea readonly class="kb-response">{{source.citations[0]?.generatedResponsePart?.textResponsePart?.text || 'No response available'}}</textarea>
+            </div>
+
+            <!-- Source References (collapsible) -->
+            <div class="source-references" *ngIf="source.citations && source.citations.length > 0">
+              <button class="references-toggle" (click)="toggleSourceExpanded(i)">
+                <span class="material-icons">{{isSourceExpanded(i) ? 'expand_less' : 'expand_more'}}</span>
+                <span>{{isSourceExpanded(i) ? 'Hide' : 'Show'}} Source Details ({{getUniqueReferencesCount(source)}} references)</span>
+              </button>
+              
+              <div class="references-content" *ngIf="isSourceExpanded(i)">
+                <div *ngFor="let citation of source.citations">
+                  <div *ngFor="let reference of citation.retrievedReferences; let refIndex = index" class="reference-item">
+                    <div class="reference-header">
+                      <span class="material-icons">article</span>
+                      <strong>Reference {{refIndex + 1}}</strong>
+                    </div>
+                    
+                    <!-- Reference Content -->
+                    <div class="reference-content" *ngIf="reference.content?.text">
+                      <h6>Content Excerpt:</h6>
+                      <pre class="content-preview">{{reference.content.text}}</pre>
+                    </div>
+
+                    <!-- S3 Location -->
+                    <div class="reference-location" *ngIf="reference.location?.s3Location?.uri">
+                      <h6>Source Location:</h6>
+                      <div class="location-display">
+                        <span class="material-icons">cloud</span>
+                        <code>{{reference.location.s3Location.uri}}</code>
+                      </div>
+                    </div>
+
+                    <!-- Metadata (collapsed by default) -->
+                    <details class="reference-metadata" *ngIf="reference.metadata">
+                      <summary>Technical Metadata</summary>
+                      <div class="metadata-content">
+                        <div *ngIf="reference.metadata['x-amz-bedrock-kb-data-source-id']">
+                          <strong>Data Source:</strong> {{reference.metadata['x-amz-bedrock-kb-data-source-id']}}
+                        </div>
+                        <div *ngIf="reference.metadata['x-amz-bedrock-kb-chunk-id']">
+                          <strong>Chunk ID:</strong> {{reference.metadata['x-amz-bedrock-kb-chunk-id']}}
+                        </div>
+                      </div>
+                    </details>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Sessions Panel -->
+<div class="floating-panel sessions-panel" [class.visible]="showSessionsPanel" [class.expanded]="showSessionsPanel">
+  <div class="panel-header">
+    <h3>
+      <mat-icon>history</mat-icon>
+      Session History
+    </h3>
+    <button class="close-button" (click)="closeSessionsPanel()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="panel-content">
+    <!-- New Session Button -->
+    <button class="new-session-button" (click)="createNewSession()">
+      <mat-icon>add</mat-icon>
+      Start New Session
+    </button>
+
+    <!-- Current Session Info -->
+    <div class="current-session-info" *ngIf="currentSessionInfo">
+      <div class="session-label">Current Session</div>
+      <div class="session-item current">
+        <div class="session-icon">
+          <mat-icon>{{ getSessionIcon(currentSessionInfo) }}</mat-icon>
+        </div>
+        <div class="session-details">
+          <div class="session-title">{{ currentSessionInfo.title }}</div>
+          <div class="session-meta">
+            <span class="message-count">{{ currentSessionInfo.messageCount || 0 }} messages</span>
+            <span class="session-date">{{ formatSessionDate(currentSessionInfo.lastUsed) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Available Sessions -->
+    <div class="sessions-list" *ngIf="availableSessions.length > 0">
+      <div class="session-label">Previous Sessions</div>
+      <div class="session-item" *ngFor="let session of availableSessions; trackBy: trackBySessionId"
+        [class.current]="isCurrentSession(session.sessionId)" (click)="switchToSession(session.sessionId)">
+        <div class="session-icon">
+          <mat-icon>{{ getSessionIcon(session) }}</mat-icon>
+        </div>
+        <div class="session-details">
+          <div class="session-title">{{ session.title }}</div>
+          <div class="session-meta">
+            <span class="message-count">{{ session.messageCount || 0 }} messages</span>
+            <span class="session-date">{{ formatSessionDate(session.lastUsed) }}</span>
+          </div>
+        </div>
+        <button class="delete-session-button" (click)="deleteSession(session.sessionId, $event)" title="Delete Session">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-sessions" *ngIf="availableSessions.length === 0">
+      <mat-icon>chat_bubble_outline</mat-icon>
+      <p>No previous sessions found</p>
+      <p class="empty-subtitle">Start a new conversation to create your first session</p>
+    </div>
+  </div>
+</div>
+
+<!-- Visibility Settings Modal -->
+<app-visibility-settings-modal [isVisible]="showVisibilitySettings" [currentSettings]="visibilitySettings"
+  [contextData]="contextData" [availableAgents]="getAvailableAgentTypes()"
+  (settingsChanged)="onVisibilitySettingsChanged($event)" (modalClosed)="onVisibilitySettingsClosed()">
+</app-visibility-settings-modal>

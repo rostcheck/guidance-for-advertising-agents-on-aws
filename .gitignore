@@ -1,0 +1,119 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+*.ipynb
+
+# Virtual Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.venv-deployment
+bandit-env
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Angular
+.angular/
+bedrock-adtech-demo/.angular
+
+# IDE and Editors
+.vscode/
+.q/
+.idea/
+*.swp
+*.swo
+*~
+.kiro/
+
+# Operating System
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary Files
+*.tmp
+*.temp
+temp-*
+tmp-*
+*/tmp/*
+
+# AWS Configuration
+aws-config.json
+*/**/aws-config.json
+bedrock-adtech-demo/src/assets/aws-config.json
+.aws/
+aws-exports.js
+
+# local deployment tracking files
+.bucket-suffix*
+.unique*
+.unique-id*
+.kb*
+.agent*
+.runtime*
+.memory*
+.appsync*
+
+# CloudFormation and CDK
+*.zip
+.cdk.staging/
+cdk.out/
+
+# Test Files
+test_*
+test-*
+
+# Security and Scanning
+scans/
+semgrep.txt
+bandit.yaml
+audit.json
+npm-audit.json
+scripts/scan.csv
+
+# Output
+bedrock-adtech-demo/src/dist
+
+# Miscellaneous
+_ignore*
+_nogit_*
+_NOGIT*
+_notused_
+bedrock-adtech-demo/src/assets/global_configuration.json
+agentcore/deployment/agent/test_handler_invocation.py

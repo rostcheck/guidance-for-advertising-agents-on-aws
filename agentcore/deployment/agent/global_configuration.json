@@ -1,0 +1,519 @@
+{
+    "knowledge_bases": {
+        "MediaPlanningAgent": "Advertising",
+        "AudienceIntelligenceAgent": "Advertising",
+        "FormatStrategyOptimizerAgent": "Advertising",
+        "YieldOptimizationAgent": "Advertising",
+        "WeatherImpactAgent": "Advertising",
+        "InventoryOptimizationAgent": "Advertising",
+        "MediaPlanCompiler": "Advertising",
+        "CampaignOptimizationAgent": "Advertising",
+        "AudienceStrategyAgent": "Advertising",
+        "ChannelMixOptimizationAgent": "Advertising",
+        "CampaignArchitectureAgent": "Advertising",
+        "CreativeSelectionAgent": "Advertising",
+        "TimingStrategyAgent": "Advertising",
+        "CurrentEventsAgent": "Advertising"
+    },
+    "configured_colors": {
+        "MediaPlanningAgent": "#41205BFF",
+        "WeatherImpactAgent": "#804294FF",
+        "AdLoadOptimizationAgent": "#E63387FF",
+        "AudienceIntelligenceAgent": "#804294FF",
+        "FormatStrategyOptimizerAgent": "#F56F02FF",
+        "YieldOptimizationAgent": "#AE427BFF",
+        "InventoryOptimizationAgent": "#E63387FF",
+        "MediaPlanCompiler": "#9C1453FF",
+        "CampaignOptimizationAgent": "#AB5209FF",
+        "AudienceStrategyAgent": "#41205BFF",
+        "ChannelMixOptimizationAgent": "#804294FF",
+        "CampaignArchitectureAgent": "#845195FF",
+        "CreativeSelectionAgent": "#AE427BFF",
+        "TimingStrategyAgent": "#E63387FF",
+        "CurrentEventsAgent": "#F56F02FF"
+
+    },
+    "agent_configs": {
+        "AdFabricAgent": {
+            "agent_id": "AdFabricAgent",
+            "agent_name": "AdFabricAgent",
+            "agent_display_name": "AdFabricAgent",
+            "team_name": "AdFabricAgent",
+            "agent_description": "Determines intent of a prompt and direct the prompt to the appropriate agent.",
+            "tool_agent_names": [
+                "MediaPlanningAgent",
+                "YieldOptimizationAgent",
+                "CampaignPlanningAgent",
+                "InventoryPlanningAgent"
+            ],
+            "external_agents": [],
+            "model_inputs": {
+                "AdFabricAgent": {
+                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "max_tokens": 12000,
+                    "temperature": 0.3,
+                    "top_p": 0.8
+                }
+            }
+        },
+        "WeatherImpactAgent": {
+            "agent_id": "WeatherImpactAgent",
+            "agent_name": "WeatherImpactAgent",
+            "agent_display_name": "WeatherImpactAgent",
+            "team_name": "Publisher Revenue Operations",
+            "agent_description": "A specialized agent that analyzes how weather conditions affect advertising campaign performance and audience behaviors. You provide strategic insights on weather-driven consumer patterns to optimize campaign timing, messaging, and targeting. You use your http capabilities to retrieve the weather conditions of a given location as part of your analysis.",
+            "tool_agent_names": [],
+            "injectable_values": {
+                "weatherAPIKey": "xxx"
+            },
+            "external_agents": [],
+            "model_inputs": {
+                "WeatherImpactAgent": {
+                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "max_tokens": 12000,
+                    "temperature": 0.3,
+                    "top_p": 0.8
+                },
+                "AudienceIntelligenceAgent": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 64000,
+                    "temperature": 0.3,
+                    "top_p": 0.8
+                }
+            }
+        },
+        "MediaPlanningAgent": {
+            "agent_id": "MediaPlanningAgent",
+            "agent_name": "MediaPlanningAgent",
+            "agent_display_name": "MediaPlanningAgent",
+            "team_name": "Publisher Revenue Operations",
+            "agent_description": "Strategic orchestrator of comprehensive media planning from the publisher's perspective, maximizing revenue and inventory utilization through intelligent collaboration",
+            "tool_agent_names": [
+                "FormatStrategyOptimizerAgent",
+                "TimingStrategyAgent",
+                "AudienceIntelligenceAgent"
+            ],
+            "external_agents": [],
+            "model_inputs": {
+                "MediaPlanningAgent": {
+                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "max_tokens": 64000,
+                    "temperature": 0.3
+                },
+                "AudienceIntelligenceAgent": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 64000,
+                    "temperature": 0.3,
+                    "top_p": 0.8
+                },
+                "FormatStrategyOptimizerAgent": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 64000,
+                    "temperature": 0.3,
+                    "top_p": 0.8
+                },
+                "TimingStrategyAgent": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 64000,
+                    "temperature": 0.3,
+                    "top_p": 0.8
+                }
+            }
+        },
+        "YieldOptimizationAgent": {
+            "agent_id": "YieldOptimizationAgent",
+            "agent_name": "YieldOptimizationAgent",
+            "agent_display_name": "Yield Optimization Agent",
+            "team_name": "Ad Monetization Team",
+            "use_handler_template": true,
+            "agent_description": "A revenue optimization and yield management specialist focused on maximizing publisher revenue through strategic pricing, inventory optimization, and performance analytics. Helps publishers optimize their advertising revenue through data-driven yield management strategies.",
+            "tool_agent_names": [
+                "FormatStrategyOptimizerAgent",
+                "TimingStrategyAgent",
+                "AudienceIntelligenceAgent"
+            ],
+            "external_agents": [],
+            "model_inputs": {
+                "YieldOptimizationAgent": {
+                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "max_tokens": 12000,
+                    "temperature": 0.3
+                },
+                "AudienceIntelligenceAgent": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 8000,
+                    "temperature": 0.3,
+                    "top_p": 0.8
+                },
+                "FormatStrategyOptimizerAgent": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 8000,
+                    "temperature": 0.3,
+                    "top_p": 0.95
+                },
+                "TimingStrategyAgent": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 8000,
+                    "temperature": 0.3,
+                    "top_p": 0.95
+                }
+            },
+            "build_timestamp": "2025-10-16T01:48:05.020928Z"
+        },
+        "CampaignOptimizationAgent": {
+            "agent_id": "CampaignOptimizationAgent",
+            "agent_name": "CampaignOptimizationAgent",
+            "agent_display_name": "Campaign Optimization Agent",
+            "team_name": "Media Strategy & Planning",
+            "agent_description": "Comprehensive campaign planning specialist for agencies and advertisers, orchestrating end-to-end campaign development from strategy to execution",
+            "tool_agent_names": [
+                "AudienceStrategyAgent",
+                "ChannelMixOptimizationAgent",
+                "CampaignArchitectureAgent",
+                "CreativeSelectionAgent",
+                "TimingStrategyAgent"
+            ],
+            "external_agents": [],
+            "use_handler_template": false,
+            "model_inputs": {
+                "CampaignOptimizationAgent": {
+                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "max_tokens": 12000,
+                    "temperature": 0.3
+                },
+                "AudienceStrategyAgent": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 8000,
+                    "temperature": 0.3,
+                    "top_p": 0.95
+                },
+                "ChannelMixOptimizationAgent": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 8000,
+                    "temperature": 0.3,
+                    "top_p": 0.95
+                },
+                "CampaignArchitectureAgent": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 8000,
+                    "temperature": 0.3,
+                    "top_p": 0.95
+                },
+                "CreativeSelectionAgent": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 8000,
+                    "temperature": 0.3,
+                    "top_p": 0.95
+                },
+                "TimingStrategyAgent": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 8000,
+                    "temperature": 0.3,
+                    "top_p": 0.95
+                }
+            },
+            "build_timestamp": "2025-10-16T01:52:31.004603Z"
+        },
+        "InventoryOptimizationAgent": {
+            "agent_id": "InventoryOptimizationAgent",
+            "agent_name": "InventoryOptimizationAgent",
+            "agent_display_name": "Inventory Optimization Agent",
+            "team_name": "Supply & Demand Planning",
+            "agent_description": "Strategic orchestrator of comprehensive inventory planning and yield optimization, maximizing revenue through intelligent forecasting and dynamic pricing strategies",
+            "tool_agent_names": [
+                "TimingStrategyAgent",
+                "FormatStrategyOptimizerAgent"
+            ],
+            "model_inputs": {
+                "InventoryOptimizationAgent": {
+                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "max_tokens": 64000,
+                    "temperature": 0.3
+                },
+                "TimingStrategyAgent": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 8000,
+                    "temperature": 0.3,
+                    "top_p": 0.8
+                },
+                "FormatStrategyOptimizerAgent": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 8000,
+                    "temperature": 0.3,
+                    "top_p": 0.8
+                }
+            },
+            "system_prompts": {},
+            "build_timestamp": "2025-10-16T01:45:27.019458Z"
+        },
+        "AudienceIntelligenceAgent": {
+            "agent_id": "AudienceIntelligenceAgent",
+            "agent_name": "AudienceIntelligenceAgent",
+            "agent_display_name": "Audience Intelligence Agent",
+            "team_name": "Consumer Insights & Analytics",
+            "protocol": "HTTP",
+            "agent_description": "Consumer behavior analysis, audience segmentation, and privacy-compliant targeting strategies, developing data-driven audience insights and targeting recommendations.",
+            "tool_agent_names": [],
+            "external_agents": [],
+            "model_inputs": {
+                "AudienceIntelligenceAgent": {
+                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "max_tokens": 8000,
+                    "temperature": 0.3
+                }
+            },
+            "build_timestamp": "2025-10-15T21:36:22.265167Z"
+        },
+        "AdLoadOptimizationAgent": {
+            "agent_id": "AdLoadOptimizationAgent",
+            "agent_name": "AdLoadOptimizationAgent",
+            "agent_display_name": "Ad Load Optimization Agent",
+            "team_name": "Consumer Insights & Analytics",
+            "protocol": "HTTP",
+            "agent_description": "Balancing viewer retention with revenue optimization",
+            "tool_agent_names": [],
+            "external_agents": [],
+            "model_inputs": {
+                "AdLoadOptimizationAgent": {
+                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "max_tokens": 8000,
+                    "temperature": 0.3
+                },
+                "TimingStrategyAgent": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 8000,
+                    "temperature": 0.3,
+                    "top_p": 0.8
+                },
+                "FormatStrategyOptimizerAgent": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 8000,
+                    "temperature": 0.3,
+                    "top_p": 0.8
+                }
+            },
+            "build_timestamp": "2025-10-15T21:36:22.265167Z"
+        },
+        "AdFormatSelectorAgent": {
+            "agent_id": "AdFormatSelectorAgent",
+            "agent_name": "AdFormatSelectorAgent",
+            "agent_display_name": "Ad Format Selector Agent",
+            "team_name": "Creative Strategy",
+            "agent_description": "Specialized agent for selecting optimal ad formats based on campaign objectives and audience preferences",
+            "tool_agent_names": [],
+            "external_agents": [],
+            "model_inputs": {
+                "AdFormatSelectorAgent": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 8000,
+                    "temperature": 0.3,
+                    "top_p": 0.8
+                }
+            }
+        },
+        "BidOptimizationAgent": {
+            "agent_id": "BidOptimizationAgent",
+            "agent_name": "BidOptimizationAgent",
+            "agent_display_name": "Bid Optimization Agent",
+            "team_name": "Programmatic Trading",
+            "agent_description": "Specialized agent for optimizing bidding strategies in programmatic advertising",
+            "tool_agent_names": [],
+            "external_agents": [],
+            "model_inputs": {
+                "BidOptimizationAgent": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 8000,
+                    "temperature": 0.3,
+                    "top_p": 0.8
+                }
+            }
+        },
+        "BidSimulatorAgent": {
+            "agent_id": "BidSimulatorAgent",
+            "agent_name": "BidSimulatorAgent",
+            "agent_display_name": "Bid Simulator Agent",
+            "team_name": "Programmatic Trading",
+            "agent_description": "Specialized agent for simulating bidding scenarios and outcomes",
+            "tool_agent_names": [],
+            "external_agents": [],
+            "model_inputs": {
+                "BidSimulatorAgent": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 8000,
+                    "temperature": 0.3,
+                    "top_p": 0.8
+                }
+            }
+        },
+        "ContextualAnalysisAgent": {
+            "agent_id": "ContextualAnalysisAgent",
+            "agent_name": "ContextualAnalysisAgent",
+            "agent_display_name": "Contextual Analysis Agent",
+            "team_name": "Content Intelligence",
+            "agent_description": "Specialized agent for analyzing content context and relevance for ad placement",
+            "tool_agent_names": [],
+            "external_agents": [],
+            "model_inputs": {
+                "ContextualAnalysisAgent": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 8000,
+                    "temperature": 0.3,
+                    "top_p": 0.8
+                }
+            }
+        },
+        "CurrentEventsAgent": {
+            "agent_id": "CurrentEventsAgent",
+            "agent_name": "CurrentEventsAgent",
+            "agent_display_name": "Current Events Agent",
+            "team_name": "Market Intelligence",
+            "agent_description": "Specialized agent for analyzing current events and their impact on advertising strategies",
+            "tool_agent_names": [],
+            "external_agents": [],
+            "model_inputs": {
+                "CurrentEventsAgent": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 8000,
+                    "temperature": 0.3,
+                    "top_p": 0.8
+                }
+            }
+        },
+        "EventsAgent": {
+            "agent_id": "EventsAgent",
+            "agent_name": "EventsAgent",
+            "agent_display_name": "Events Agent",
+            "team_name": "Event Marketing",
+            "agent_description": "Specialized agent for event-based advertising and sponsorship strategies",
+            "tool_agent_names": [],
+            "external_agents": [],
+            "model_inputs": {
+                "EventsAgent": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 8000,
+                    "temperature": 0.3,
+                    "top_p": 0.8
+                }
+            }
+        },
+        "MediaPlanCompiler": {
+            "agent_id": "MediaPlanCompiler",
+            "agent_name": "MediaPlanCompiler",
+            "agent_display_name": "Media Plan Compiler",
+            "team_name": "Media Planning",
+            "agent_description": "Specialized agent for compiling and synthesizing comprehensive media plans",
+            "tool_agent_names": [],
+            "external_agents": [],
+            "model_inputs": {
+                "MediaPlanCompiler": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 12000,
+                    "temperature": 0.3,
+                    "top_p": 0.8
+                }
+            }
+        },
+        "AudienceStrategyAgent": {
+            "agent_id": "AudienceStrategyAgent",
+            "agent_name": "AudienceStrategyAgent",
+            "agent_display_name": "Audience Strategy Agent",
+            "team_name": "Audience Planning",
+            "agent_description": "Specialized agent for developing audience targeting and segmentation strategies",
+            "tool_agent_names": [],
+            "external_agents": [],
+            "model_inputs": {
+                "AudienceStrategyAgent": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 8000,
+                    "temperature": 0.3,
+                    "top_p": 0.95
+                }
+            }
+        },
+        "ChannelMixOptimizationAgent": {
+            "agent_id": "ChannelMixOptimizationAgent",
+            "agent_name": "ChannelMixOptimizationAgent",
+            "agent_display_name": "Channel Mix Optimization Agent",
+            "team_name": "Media Strategy",
+            "agent_description": "Specialized agent for optimizing channel mix and budget allocation across media channels",
+            "tool_agent_names": [],
+            "external_agents": [],
+            "model_inputs": {
+                "ChannelMixOptimizationAgent": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 8000,
+                    "temperature": 0.3,
+                    "top_p": 0.95
+                }
+            }
+        },
+        "CampaignArchitectureAgent": {
+            "agent_id": "CampaignArchitectureAgent",
+            "agent_name": "CampaignArchitectureAgent",
+            "agent_display_name": "Campaign Architecture Agent",
+            "team_name": "Campaign Planning",
+            "agent_description": "Specialized agent for designing campaign structure and execution frameworks",
+            "tool_agent_names": [],
+            "external_agents": [],
+            "model_inputs": {
+                "CampaignArchitectureAgent": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 8000,
+                    "temperature": 0.3,
+                    "top_p": 0.95
+                }
+            }
+        },
+        "CreativeSelectionAgent": {
+            "agent_id": "CreativeSelectionAgent",
+            "agent_name": "CreativeSelectionAgent",
+            "agent_display_name": "Creative Selection Agent",
+            "team_name": "Creative Strategy",
+            "agent_description": "Specialized agent for selecting and optimizing creative assets for campaigns",
+            "tool_agent_names": [],
+            "external_agents": [],
+            "model_inputs": {
+                "CreativeSelectionAgent": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 8000,
+                    "temperature": 0.3,
+                    "top_p": 0.95
+                }
+            }
+        },
+        "TimingStrategyAgent": {
+            "agent_id": "TimingStrategyAgent",
+            "agent_name": "TimingStrategyAgent",
+            "agent_display_name": "Timing Strategy Agent",
+            "team_name": "Campaign Execution",
+            "agent_description": "Specialized agent for optimizing campaign timing and scheduling strategies",
+            "tool_agent_names": [],
+            "external_agents": [],
+            "model_inputs": {
+                "TimingStrategyAgent": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 8000,
+                    "temperature": 0.3,
+                    "top_p": 0.95
+                }
+            }
+        },
+        "FormatStrategyOptimizerAgent": {
+            "agent_id": "FormatStrategyOptimizerAgent",
+            "agent_name": "FormatStrategyOptimizerAgent",
+            "agent_display_name": "Format Strategy Optimizer Agent",
+            "team_name": "Creative Strategy",
+            "agent_description": "Specialized agent for optimizing ad format selection and performance",
+            "tool_agent_names": [],
+            "external_agents": [],
+            "model_inputs": {
+                "FormatStrategyOptimizerAgent": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 8000,
+                    "temperature": 0.3,
+                    "top_p": 0.95
+                }
+            }
+        }
+    }
+}
