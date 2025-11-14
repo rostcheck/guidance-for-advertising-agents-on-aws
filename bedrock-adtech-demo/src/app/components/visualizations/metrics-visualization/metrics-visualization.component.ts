@@ -34,7 +34,7 @@ export class MetricsVisualizationComponent implements OnChanges {
     }
 
     const currentHash = this.cacheService.generateKey('metrics', this.metricData);
-    
+
     // Only reprocess if data has changed
     if (this.lastInputHash === currentHash && this.processedData) {
       return;
@@ -102,42 +102,42 @@ export class MetricsVisualizationComponent implements OnChanges {
     if (!Array.isArray(metrics) || metrics.length === 0) {
       return false;
     }
-    
+
     const firstMetric = metrics[0];
-    
+
     // Check if it's NEW STANDARDIZED structured format (has subMetrics array)
     if (firstMetric && typeof firstMetric === 'object') {
       // NEW FORMAT: Check for standardized subMetrics structure
       const hasStandardizedFormat = !!(
-        firstMetric.name && 
-        Array.isArray(firstMetric.subMetrics) && 
+        firstMetric.name &&
+        Array.isArray(firstMetric.subMetrics) &&
         firstMetric.subMetrics.length > 0
       );
-      
+
       // GENERIC FORMAT: Check for generic card structure
       const hasGenericFormat = !!(
-        firstMetric.primaryLabel && 
+        firstMetric.primaryLabel &&
         (firstMetric.items || firstMetric.metrics || firstMetric.subMetrics)
       );
-      
+
       // LEGACY FORMAT: Check for legacy structured properties
       const hasLegacyStructuredProps = !!(
-        firstMetric.product_line || 
-        firstMetric.projected_roas || 
-        firstMetric.win_rate || 
-        firstMetric.recommended_budget || 
+        firstMetric.product_line ||
+        firstMetric.projected_roas ||
+        firstMetric.win_rate ||
+        firstMetric.recommended_budget ||
         firstMetric.expected_cvr ||
         (firstMetric.name && !firstMetric.subMetrics) ||
         firstMetric.segment
       );
-      
+
       // SIMPLE FORMAT: Check for simple label/value format
       const hasSimpleProps = !!(firstMetric.label && (firstMetric.value !== undefined));
-      
+
       // Return true if it's standardized format OR generic format OR legacy structured format (but not simple format)
       return hasStandardizedFormat || hasGenericFormat || (hasLegacyStructuredProps && !hasSimpleProps);
     }
-    
+
     return false;
   }
 
@@ -149,7 +149,7 @@ export class MetricsVisualizationComponent implements OnChanges {
 
     // Exclude header properties that shouldn't be displayed as metrics
     const excludedProps = ['product_line', 'name', 'segment', 'id', 'title', 'primaryLabel', 'items', 'metrics', 'subMetrics'];
-    
+
     return Object.keys(metricItem)
       .filter(key => !excludedProps.includes(key) && metricItem[key] != null)
       .map(key => ({ key, value: metricItem[key] }));
@@ -158,31 +158,31 @@ export class MetricsVisualizationComponent implements OnChanges {
   // Helper method to get generic metric items
   getGenericMetricItems(metricItem: any): any[] {
     if (!metricItem) return [];
-    
+
     // Check for generic structure
     if (metricItem.items) return metricItem.items;
     if (metricItem.metrics) return metricItem.metrics;
     if (metricItem.subMetrics) return metricItem.subMetrics;
-    
+
     return [];
   }
 
   // Helper method to format metric values
   formatMetricValue(key: string, value: any): string {
     const keyLower = key.toLowerCase();
-    
+
     if (keyLower.includes('roas') || keyLower.includes('ratio')) {
       return `${value}${value.toString().includes('x') ? '' : 'x'}`;
     }
-    
+
     if (keyLower.includes('rate') || keyLower.includes('cvr') || keyLower.includes('ctr') || keyLower.includes('percentage')) {
       return value.toString().includes('%') ? value : `${value}%`;
     }
-    
+
     if (keyLower.includes('budget') || keyLower.includes('cost') || keyLower.includes('price') || keyLower.includes('cpa')) {
-      return value.toString().replace('$', '').replace('€', '').replace('£', '');
+      return value.toString().replace(/[$€£]/g, '');
     }
-    
+
     return value.toString();
   }
 
@@ -200,8 +200,8 @@ export class MetricsVisualizationComponent implements OnChanges {
       'click_through_rate': 'CTR',
       'return_on_ad_spend': 'ROAS'
     };
-    
-    return labelMap[key] || key.split('_').map(word => 
+
+    return labelMap[key] || key.split('_').map(word =>
       word.charAt(0).toUpperCase() + word.slice(1)
     ).join(' ');
   }
@@ -212,17 +212,17 @@ export class MetricsVisualizationComponent implements OnChanges {
 
   private computeMetricsArray(): any[] {
     if (!this.metricData) return [];
-    
+
     // Handle new visualizationType format where metrics is an array
     if (this.metricData.metrics && Array.isArray(this.metricData.metrics)) {
       return this.metricData.metrics;
     }
-    
+
     // Handle case where metricData itself is an array
     if (Array.isArray(this.metricData)) {
       return this.metricData;
     }
-    
+
     return [];
   }
 

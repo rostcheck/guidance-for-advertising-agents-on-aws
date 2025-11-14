@@ -6,6 +6,8 @@ import { AwsConfigService } from './aws-config.service';
 import { TextUtils } from '../utils/text-utils';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import { AgentConfig, DeployedAgent, EnrichedAgent, TabConfiguration, TabsConfiguration } from '../models/application-models';
+import { SessionManagerService } from './session-manager.service';
+import { userInfo } from 'os';
 
 
 @Injectable({
@@ -31,7 +33,8 @@ export class AgentConfigService implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private awsConfig: AwsConfigService
+    private awsConfig: AwsConfigService,
+    private sessionManager:SessionManagerService
   ) {
     this.loadAgentConfig();
     this.getGlobalConfig();
@@ -522,56 +525,6 @@ export class AgentConfigService implements OnInit {
 
   // Agent color caching to ensure consistency within a session
   private agentColorCache = new Map<string, string>(); // agentKey -> color
-
-  /**
-   * Generate a unique session ID for an agent
-   */
-  private generateAgentSessionId(agentId: string): string {
-    const timestamp = Date.now();
-    const randomString = Math.random().toString(36).substring(2, 15);
-    return `agent-${agentId}-${timestamp}-${randomString}`;
-  }
-
-  /**
-   * Get or create a session ID for a specific agent
-   */
-  getAgentSessionId(agentKey: string): string {
-    const agent = this.getAgent(agentKey);
-    if (!agent) {
-      console.warn(`⚠️ Agent not found for key: ${agentKey}, generating fallback session`);
-      return this.generateAgentSessionId('unknown');
-    }
-
-    // Check if we already have a session for this agent
-    if (this.agentSessions.has(agent.id)) {
-      return this.agentSessions.get(agent.id)!;
-    }
-
-    // Create new session for this agent
-    const sessionId = this.generateAgentSessionId(agent.id);
-    this.agentSessions.set(agent.id, sessionId);
-    return sessionId;
-  }
-
-  /**
-   * Reset session for a specific agent (creates new session)
-   */
-  resetAgentSession(agentKey: string): string {
-    const agent = this.getAgent(agentKey);
-    if (!agent) {
-      console.warn(`⚠️ Agent not found for key: ${agentKey}`);
-      return this.generateAgentSessionId('unknown');
-    }
-
-    const newSessionId = this.generateAgentSessionId(agent.id);
-    this.agentSessions.set(agent.id, newSessionId);
-
-    // Clear any cached session color
-    this.sessionColors.delete(newSessionId);
-
-    return newSessionId;
-  }
-
   /**
    * Clear all agent sessions
    */

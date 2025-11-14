@@ -66,6 +66,16 @@ export class SessionManagerService {
   }
 
   /**
+   * Generate a cryptographically secure random string of the requested length
+   */
+  private generateSecureRandomString(length: number): string {
+    const array = new Uint8Array(length);
+    window.crypto.getRandomValues(array);
+    // Convert each byte to base36 (0-9, a-z); pad if needed.
+    return Array.from(array, byte => byte.toString(36).padStart(2, '0')).join('').substr(0, length);
+  }
+
+  /**
    * Get all sessions for a specific tab
    */
   getTabSessions(userId?: string, customerName?: string, tabId?: string): SessionInfo[] {
@@ -165,7 +175,7 @@ export class SessionManagerService {
     if (!tabId) {
       tabId = sessionStorage.getItem('browserTabId') || undefined;
       if (!tabId) {
-        tabId = `tab-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        tabId = `tab-${Date.now()}-${this.generateSecureRandomString(9)}`;
         sessionStorage.setItem('browserTabId', tabId);
       }
     }

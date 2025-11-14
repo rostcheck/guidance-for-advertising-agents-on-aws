@@ -1915,7 +1915,7 @@ class ManualAgentCoreDeployer:
                 principal = statement.get("Principal", {})
                 if isinstance(principal, dict):
                     service = principal.get("Service", "")
-                    if "bedrock-agentcore.amazonaws.com" in service:
+                    if (isinstance(service, str) and service == "bedrock-agentcore.amazonaws.com") or (isinstance(service, list) and "bedrock-agentcore.amazonaws.com" in service):
                         logger.info("✅ Role trust policy allows AgentCore service")
                         return True
 
