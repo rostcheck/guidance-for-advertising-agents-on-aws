@@ -752,7 +752,7 @@ Example format:
       }
 
       // Route to the specified agent type using centralized agent config
-      const resolvedAgent = this.agentConfig.getAgent(directMentionTarget||agentType);
+      const resolvedAgent = this.agentConfig.getAgent(directMentionTarget || agentType);
       if (!resolvedAgent) {
 
         return;
@@ -1902,14 +1902,14 @@ Example format:
                       let isExternalAgent = false;
                       if (dataContent.toLowerCase().indexOf('invoke_external_agent_with_sdk') > -1) {
                         isExternalAgent = true;
-                        let escapedLine = dataContent.replace(/\\n/g, "\\n")
-                          .replace(/\\'/g, "\\'")
-                          .replace(/\\"/g, '\\"')
-                          .replace(/\\&/g, "\\&")
-                          .replace(/\\r/g, "\\r")
-                          .replace(/\\t/g, "\\t")
-                          .replace(/\\b/g, "\\b")
-                          .replace(/\\f/g, "\\f");
+                        let escapedLine = dataContent.replace(/\\n/g, "\n")
+                          .replace(/\\'/g, "'")
+                          .replace(/\\"/g, '"')
+                          .replace(/\\&/g, "&")
+                          .replace(/\\r/g, "\r")
+                          .replace(/\\t/g, "\t")
+                          .replace(/\\b/g, "\b")
+                          .replace(/\\f/g, "\f");
                         dataContent = escapedLine;
                       }
 
@@ -2021,7 +2021,7 @@ Example format:
                               console.log('🔍 Processing toolResult:', toolResult);
 
                               if (toolResult.content && Array.isArray(toolResult.content)) {
-                                
+
                                 for (const toolContent of toolResult.content) {
                                   if (toolContent.text) {
                                     // Parse the tool result text to extract agent information
@@ -2029,7 +2029,7 @@ Example format:
                                     console.log('🔍 Tool result text:', toolText.substring(0, 200));
 
                                     // Look for agent-message format: <agent-message agent='agent_name'>content</agent-message>
-                                    const agentMessageMatch = toolText.replace(" direct_mention='true'",'').match(/<agent-message agent='([^']+)'>([\s\S]*?)<\/agent-message>/);
+                                    const agentMessageMatch = toolText.replace(" direct_mention='true'", '').match(/<agent-message agent='([^']+)'>([\s\S]*?)<\/agent-message>/);
                                     if (agentMessageMatch) {
                                       const toolAgentName = agentMessageMatch[1];
                                       const toolAgentContent = agentMessageMatch[2].trim();
