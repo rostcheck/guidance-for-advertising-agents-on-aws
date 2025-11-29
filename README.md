@@ -54,7 +54,7 @@ This guidance provides an agentic solution that delivers:
 
 ### Cost 
 
-_You are responsible for the cost of the AWS services used while running this Guidance. As of October 2025, the cost for running this Guidance with the default settings in the US East (N. Virginia) region is approximately $50.00 per month for processing 10,000 agent interactions._
+_You are responsible for the cost of the AWS services used while running this Guidance. As of October 2025, the cost for running this Guidance with the default settings in the US East (N. Virginia) region is approximately $329.86 per month, assuming daily usage (see cost breakdown for details)._
 
 The AgentCore deployment model provides cost advantages through:
 - **Pay-per-use container runtime**: Only pay when agents are actively processing requests
