@@ -623,6 +623,7 @@ class ManualAgentCoreDeployer:
                     "Resource": [f"arn:aws:logs:{self.region}:{account_id}:*"],
                 },
                 {
+                    "Sid": "XRayTracing",
                     "Effect": "Allow",
                     "Action": [
                         "xray:PutTraceSegments",
@@ -630,7 +631,7 @@ class ManualAgentCoreDeployer:
                         "xray:GetSamplingRules",
                         "xray:GetSamplingTargets",
                     ],
-                    "Resource": [f"arn:aws:xray:*:{account_id}:group/*/*"],
+                    "Resource": "*",
                 },
                 {
                     "Effect": "Allow",
@@ -722,6 +723,16 @@ class ManualAgentCoreDeployer:
             self.iam_client.attach_role_policy(RoleName=role_name, PolicyArn=policy_arn)
             logger.info(f"Attached policy to role: {role_name}")
 
+            # Attach AWS managed X-Ray policy for OpenTelemetry tracing
+            try:
+                self.iam_client.attach_role_policy(
+                    RoleName=role_name,
+                    PolicyArn="arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess"
+                )
+                logger.info(f"Attached AWSXRayDaemonWriteAccess policy to role: {role_name}")
+            except Exception as e:
+                logger.warning(f"Could not attach X-Ray policy (may already be attached): {e}")
+
             # Wait for IAM policy propagation
             logger.info("Waiting 30 seconds for IAM policy propagation...")
             # nosemgrep: arbitrary-sleep - Required for IAM policy propagation
@@ -761,6 +772,19 @@ class ManualAgentCoreDeployer:
                         logger.info(f"Policy already attached to role: {role_name}")
                     else:
                         logger.warning(f"Could not attach policy: {e}")
+
+                # Attach AWS managed X-Ray policy for OpenTelemetry tracing
+                try:
+                    self.iam_client.attach_role_policy(
+                        RoleName=role_name,
+                        PolicyArn="arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess"
+                    )
+                    logger.info(f"Attached AWSXRayDaemonWriteAccess policy to existing role: {role_name}")
+                except Exception as e:
+                    if "is already attached" in str(e).lower() or "already attached" in str(e).lower():
+                        logger.info(f"X-Ray policy already attached to role: {role_name}")
+                    else:
+                        logger.warning(f"Could not attach X-Ray policy: {e}")
 
                 # Wait for IAM policy propagation
                 logger.info("Waiting 30 seconds for IAM policy propagation...")

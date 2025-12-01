@@ -1,0 +1,18 @@
+{
+  "agentName": "PublisherAgent",
+  "agentId": "publisher-agent",
+  "templates": [
+    {
+      "templateId": "allocations-visualization",
+      "usage": "Inventory allocation and product mix"
+    },
+    {
+      "templateId": "metrics-visualization",
+      "usage": "Delivery metrics and campaign performance"
+    },
+    {
+      "templateId": "timeline-visualization",
+      "usage": "Campaign delivery timeline and pacing"
+    }
+  ]
+}

@@ -2527,13 +2527,14 @@ EOF
         echo ""
         print_success "🎉 Step 6 Complete: AgentCore agents have been deployed!"
         print_status "The following steps remain:"
-        print_status "  - Step 7: Generate AWS configuration"
+        print_status "  - Step 7: Deploy AdCP MCP Gateway"
+        print_status "  - Step 8: Generate AWS configuration"
         echo ""
         printf "Continue with remaining deployment steps? (Y/n): "
         read -r continue_response
         if [[ "$continue_response" =~ ^[Nn]$ ]]; then
             print_status "Deployment paused after Step 6. You can resume later by running the script again."
-            print_status "Current progress has been saved and the script will resume from Step 7."
+            print_status "Current progress has been saved and the script will resume from Step 7 (AdCP Gateway)."
             exit 0
         fi
         print_status "Continuing with remaining deployment steps..."
@@ -2541,9 +2542,88 @@ EOF
     fi
 }
 
+# Function to deploy AdCP MCP Gateway for agent collaboration
+deploy_adcp_mcp_gateway() {
+    print_step "Step 7: Deploying AdCP MCP Gateway for agent collaboration..."
+    
+    local deploy_script="${PROJECT_ROOT}/agentcore/deployment/deploy_adcp_gateway.py"
+    
+    if [ ! -f "$deploy_script" ]; then
+        print_warning "AdCP Gateway deployment script not found: $deploy_script"
+        print_warning "Skipping AdCP MCP Gateway deployment"
+        return 0
+    fi
+    
+    # Setup Python environment
+    setup_python_environment
+    
+    print_status "Deploying AdCP MCP Gateway..."
+    print_status "  Stack Prefix: $STACK_PREFIX"
+    print_status "  Unique ID: $UNIQUE_ID"
+    print_status "  Region: $AWS_REGION"
+    print_status "  AWS Profile: ${AWS_PROFILE:-default}"
+    
+    # Export AWS environment variables for Python subprocess
+    export AWS_DEFAULT_REGION="$AWS_REGION"
+    if [ -n "$AWS_PROFILE" ]; then
+        export AWS_PROFILE="$AWS_PROFILE"
+    fi
+    
+    # Build command
+    local deploy_cmd="$PYTHON_CMD $deploy_script --stack-prefix $STACK_PREFIX --unique-id $UNIQUE_ID --region $AWS_REGION"
+    
+    if [ -n "$AWS_PROFILE" ]; then
+        deploy_cmd="$deploy_cmd --profile $AWS_PROFILE"
+    fi
+    
+    print_status "Executing: $deploy_cmd"
+    
+    # Execute deployment
+    local deploy_output
+    local deploy_exit_code
+    deploy_output=$(eval "$deploy_cmd" 2>&1)
+    deploy_exit_code=$?
+    
+    if [ $deploy_exit_code -eq 0 ]; then
+        print_success "✅ AdCP MCP Gateway deployed successfully"
+        
+        # Extract gateway URL from output if available
+        local gateway_url=$(echo "$deploy_output" | grep -o 'gateway_url.*' | head -1 | sed 's/.*: *"\([^"]*\)".*/\1/' 2>/dev/null || echo "")
+        
+        if [ -n "$gateway_url" ] && [ "$gateway_url" != "null" ]; then
+            print_status "  Gateway URL: $gateway_url"
+            
+            # Store gateway URL in SSM for agents to use
+            local ssm_param_name="/${STACK_PREFIX}/adcp_gateway/${UNIQUE_ID}"
+            if aws_cmd ssm put-parameter \
+                --name "$ssm_param_name" \
+                --value "$gateway_url" \
+                --type "String" \
+                --overwrite \
+                --region "$AWS_REGION" > /dev/null 2>&1; then
+                print_status "  Gateway URL stored in SSM: $ssm_param_name"
+            fi
+        fi
+        
+        # Save deployment output to file
+        local gateway_info_file="${PROJECT_ROOT}/.adcp-gateway-${STACK_PREFIX}-${UNIQUE_ID}.json"
+        echo "$deploy_output" > "$gateway_info_file"
+        print_status "  Deployment info saved to: $gateway_info_file"
+        
+    else
+        print_warning "⚠️  AdCP MCP Gateway deployment had issues (exit code: $deploy_exit_code)"
+        print_warning "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "$deploy_output"
+        print_warning "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        print_warning "Continuing with deployment - agents will use fallback local tools"
+    fi
+    
+    return 0
+}
+
 # Function to generate UI configuration
 generate_ui_config() {
-    print_step "Step 7: Generating UI configuration..."
+    print_step "Step 8: Generating UI configuration..."
     
     # Create assets directory
     ANGULAR_ASSETS_DIR="${PROJECT_ROOT}/bedrock-adtech-demo/src/assets"
@@ -3726,8 +3806,8 @@ confirm_deployment_steps() {
         "Step 4: Deploy knowledge bases with organized data sources"
         "Step 5: Sync data sources (start ingestion jobs)"
         "Step 6: Detect and deploy AgentCore agents"
-        "Step 7: Generate UI configuration"
-        
+        "Step 7: Deploy AdCP MCP Gateway for agent collaboration"
+        "Step 8: Generate UI configuration"
     )
     
     print_status "The following steps will be executed:"
@@ -3821,7 +3901,8 @@ main() {
     # Step 4: Deploy knowledge bases with organized data sources
     # Step 5: Sync data sources (start ingestion jobs)
     # Step 6: Detect and deploy AgentCore agents
-    # Step 7: Generate UI configuration
+    # Step 7: Deploy AdCP MCP Gateway for agent collaboration
+    # Step 8: Generate UI configuration
     
     # Pre-deployment validation
     if [ "$RESUME_AT_STEP" -le 1 ]; then
@@ -3864,6 +3945,10 @@ main() {
     fi
     
     if [ "$RESUME_AT_STEP" -le 7 ]; then
+        deploy_adcp_mcp_gateway
+    fi
+    
+    if [ "$RESUME_AT_STEP" -le 8 ]; then
         generate_ui_config
     fi
     # Final summary
@@ -3880,6 +3965,12 @@ main() {
     print_status "  ✅ Knowledge Bases: Deployed with Data Sources"
     print_status "  ✅ Data Source Ingestion: Triggered"
     print_status "  ✅ Visualization Data: Migrated to DynamoDB for AgentCore agents"
+    
+    # Check if AdCP Gateway was deployed
+    local gateway_info_file="${PROJECT_ROOT}/.adcp-gateway-${STACK_PREFIX}-${UNIQUE_ID}.json"
+    if [ -f "$gateway_info_file" ]; then
+        print_status "  ✅ AdCP MCP Gateway: Deployed for agent collaboration"
+    fi
     # Check if AgentCore agents were actually deployed by looking at the file
     local agentcore_info_file="${PROJECT_ROOT}/.agentcore-agents-${STACK_PREFIX}-${UNIQUE_ID}.json"
     if [ -f "$agentcore_info_file" ]; then

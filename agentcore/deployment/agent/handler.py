@@ -27,6 +27,7 @@ from shared.response_model import (
     ResponseModel,
 )
 from shared.image_generator import generate_image_from_descriptions
+from shared.adcp_tools import ADCP_TOOLS
 import re
 
 # Add the parent directory to path for shared imports
@@ -579,6 +580,45 @@ def invoke_specialist_with_RAG(
 
 
 @tool
+def invoke_specialist(agent_prompt: str, agent_name: str) -> str:
+    """
+    Invoke a specialist agent for collaboration without requiring a knowledge base query.
+    
+    Use this tool to collaborate with other agents in the agentic advertising ecosystem.
+    This is ideal for agents that don't need to query knowledge bases but need to 
+    coordinate with other specialists (e.g., VerificationAgent, IdentityAgent, etc.)
+    
+    Args:
+        agent_prompt: The prompt/request to send to the specialist agent
+        agent_name: Name of the specialist agent to invoke (e.g., "VerificationAgent", "IdentityAgent")
+    
+    Returns:
+        Response from the specialist agent wrapped in agent-message tags
+    """
+    global orchestrator_instance
+    
+    logger.info(f"🔧 TOOL: Invoking specialist agent: {agent_name}")
+    
+    # Get memory configuration from the orchestrator instance if available
+    session_id = orchestrator_instance.session_id
+    memory_id = orchestrator_instance.memory_id
+    
+    # Normalize actor_id to comply with validation pattern
+    normalized_actor_id = agent_name.replace("_", "-")
+    
+    # Create and invoke the specialist agent
+    agent = create_agent(
+        agent_name=agent_name, conversation_context="", is_collaborator=True
+    )
+    result = agent(f"""{agent_prompt}""")
+
+    response_wrapper = (
+        f"<agent-message agent='{agent_name}'>{str(result)}</agent-message>"
+    )
+    return response_wrapper
+
+
+@tool
 def lookup_events(agent_name: str, max_results: int = 5) -> str:
     """
     Look up the last things said by a specific agent in the current session.
@@ -859,6 +899,16 @@ def create_agent(agent_name, conversation_context, is_collaborator):
         invoke_specialist_with_RAG,
         http_request,
     ]
+    
+    # Add AdCP tools for ecosystem agents that need them
+    ADCP_ENABLED_AGENTS = [
+        "AgencyAgent", "AdvertiserAgent", "PublisherAgent", 
+        "SignalAgent", "VerificationAgent", "MeasurementAgent", "IdentityAgent"
+    ]
+    if agent_name in ADCP_ENABLED_AGENTS:
+        tools.extend(ADCP_TOOLS)
+        logger.info(f"🔧 CREATE_AGENT: Added AdCP tools for {agent_name}")
+    
     collaborator_config = get_collaborator_agent_config(
         agent_name=agent_name, orchestrator_name=orchestrator_instance.agent_name
     )
@@ -1705,6 +1755,15 @@ class GenericAgent:
                 generate_image_from_descriptions,
                 lookup_events,
             ]
+            
+            # Add AdCP tools for ecosystem agents that need them
+            ADCP_ENABLED_AGENTS = [
+                "AgencyAgent", "AdvertiserAgent", "PublisherAgent", 
+                "SignalAgent", "VerificationAgent", "MeasurementAgent", "IdentityAgent"
+            ]
+            if agent_name in ADCP_ENABLED_AGENTS:
+                tools.extend(ADCP_TOOLS)
+                logger.info(f"🔧 CREATE_ORCHESTRATOR: Added AdCP tools for {agent_name}")
         except Exception as e:
             logger.error(f"✗ Failed to build tools list: {e}")
 

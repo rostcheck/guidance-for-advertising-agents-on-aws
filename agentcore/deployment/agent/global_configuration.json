@@ -13,7 +13,14 @@
         "CampaignArchitectureAgent": "Advertising",
         "CreativeSelectionAgent": "Advertising",
         "TimingStrategyAgent": "Advertising",
-        "CurrentEventsAgent": "Advertising"
+        "CurrentEventsAgent": "Advertising",
+        "AgencyAgent": "Advertising",
+        "AdvertiserAgent": "Advertising",
+        "PublisherAgent": "Advertising",
+        "SignalAgent": "Advertising",
+        "VerificationAgent": "Advertising",
+        "MeasurementAgent": "Advertising",
+        "IdentityAgent": "Advertising"
     },
     "configured_colors": {
         "MediaPlanningAgent": "#41205BFF",
@@ -30,8 +37,14 @@
         "CampaignArchitectureAgent": "#845195FF",
         "CreativeSelectionAgent": "#AE427BFF",
         "TimingStrategyAgent": "#E63387FF",
-        "CurrentEventsAgent": "#F56F02FF"
-
+        "CurrentEventsAgent": "#F56F02FF",
+        "AgencyAgent": "#1E3A5FFF",
+        "AdvertiserAgent": "#2E7D32FF",
+        "PublisherAgent": "#C62828FF",
+        "SignalAgent": "#6A1B9AFF",
+        "VerificationAgent": "#00695CFF",
+        "MeasurementAgent": "#EF6C00FF",
+        "IdentityAgent": "#37474FFF"
     },
     "agent_configs": {
         "AdFabricAgent": {
@@ -512,6 +525,155 @@
                     "max_tokens": 8000,
                     "temperature": 0.3,
                     "top_p": 0.95
+                }
+            }
+        },
+        "AgencyAgent": {
+            "agent_id": "AgencyAgent",
+            "agent_name": "AgencyAgent",
+            "agent_display_name": "Agency Agent",
+            "team_name": "Agentic Advertising Ecosystem",
+            "agent_description": "Orchestrator agent managing advertising campaigns, coordinating between advertisers, publishers, signal providers, identity services, verification vendors, and measurement partners",
+            "tool_agent_names": [],
+            "external_agents": ["AdvertiserAgent", "PublisherAgent", "SignalAgent", "VerificationAgent", "MeasurementAgent", "IdentityAgent"],
+            "injectable_values": {
+                "agency_id": "agy_omni_001",
+                "agency_name": "Omnicom Media Group"
+            },
+            "model_inputs": {
+                "AgencyAgent": {
+                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "max_tokens": 16000,
+                    "temperature": 0.3,
+                    "top_p": 0.9
+                }
+            }
+        },
+        "AdvertiserAgent": {
+            "agent_id": "AdvertiserAgent",
+            "agent_name": "AdvertiserAgent",
+            "agent_display_name": "Advertiser Agent",
+            "team_name": "Agentic Advertising Ecosystem",
+            "agent_description": "Principal agent representing advertiser interests, initiating campaigns, approving strategies, and ensuring brand standards",
+            "tool_agent_names": [],
+            "external_agents": ["AgencyAgent"],
+            "injectable_values": {
+                "advertiser_id": "adv_cpg_001",
+                "advertiser_name": "Acme Consumer Goods",
+                "brand_name": "Acme Energy",
+                "brand_url": "https://acmeenergy.com"
+            },
+            "model_inputs": {
+                "AdvertiserAgent": {
+                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "max_tokens": 12000,
+                    "temperature": 0.3,
+                    "top_p": 0.9
+                }
+            }
+        },
+        "PublisherAgent": {
+            "agent_id": "PublisherAgent",
+            "agent_name": "PublisherAgent",
+            "agent_display_name": "Publisher Agent",
+            "team_name": "Agentic Advertising Ecosystem",
+            "agent_description": "Sales agent representing publisher inventory, responding to discovery requests, negotiating media buys, and managing campaign delivery",
+            "tool_agent_names": [],
+            "external_agents": ["AgencyAgent"],
+            "injectable_values": {
+                "publisher_id": "pub_espn_001",
+                "publisher_name": "ESPN"
+            },
+            "model_inputs": {
+                "PublisherAgent": {
+                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "max_tokens": 12000,
+                    "temperature": 0.3,
+                    "top_p": 0.9
+                }
+            }
+        },
+        "SignalAgent": {
+            "agent_id": "SignalAgent",
+            "agent_name": "SignalAgent",
+            "agent_display_name": "Signal Agent",
+            "team_name": "Agentic Advertising Ecosystem",
+            "agent_description": "Data provider agent offering audience signals, contextual signals, and data segments for campaign targeting",
+            "tool_agent_names": [],
+            "external_agents": ["AgencyAgent"],
+            "injectable_values": {
+                "provider_id": "sig_lr_001",
+                "provider_name": "LiveRamp"
+            },
+            "model_inputs": {
+                "SignalAgent": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 8000,
+                    "temperature": 0.3,
+                    "top_p": 0.9
+                }
+            }
+        },
+        "VerificationAgent": {
+            "agent_id": "VerificationAgent",
+            "agent_name": "VerificationAgent",
+            "agent_display_name": "Verification Agent",
+            "team_name": "Agentic Advertising Ecosystem",
+            "agent_description": "Quality assurance agent providing brand safety verification, fraud detection, viewability measurement, and attention metrics",
+            "tool_agent_names": [],
+            "external_agents": ["AgencyAgent"],
+            "injectable_values": {
+                "provider_id": "ver_dv_001",
+                "provider_name": "DoubleVerify"
+            },
+            "model_inputs": {
+                "VerificationAgent": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 8000,
+                    "temperature": 0.3,
+                    "top_p": 0.9
+                }
+            }
+        },
+        "MeasurementAgent": {
+            "agent_id": "MeasurementAgent",
+            "agent_name": "MeasurementAgent",
+            "agent_display_name": "Measurement Agent",
+            "team_name": "Agentic Advertising Ecosystem",
+            "agent_description": "Measurement partner agent providing brand lift studies, attribution analysis, foot traffic measurement, and sales lift studies",
+            "tool_agent_names": [],
+            "external_agents": ["AgencyAgent"],
+            "injectable_values": {
+                "provider_id": "meas_lucid_001",
+                "provider_name": "Lucid"
+            },
+            "model_inputs": {
+                "MeasurementAgent": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 8000,
+                    "temperature": 0.3,
+                    "top_p": 0.9
+                }
+            }
+        },
+        "IdentityAgent": {
+            "agent_id": "IdentityAgent",
+            "agent_name": "IdentityAgent",
+            "agent_display_name": "Identity Agent",
+            "team_name": "Agentic Advertising Ecosystem",
+            "agent_description": "Identity infrastructure agent providing cross-device resolution, privacy-compliant tokens, and reach estimation",
+            "tool_agent_names": [],
+            "external_agents": ["AgencyAgent"],
+            "injectable_values": {
+                "provider_id": "id_lr_001",
+                "provider_name": "LiveRamp Identity"
+            },
+            "model_inputs": {
+                "IdentityAgent": {
+                    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+                    "max_tokens": 8000,
+                    "temperature": 0.3,
+                    "top_p": 0.9
                 }
             }
         }

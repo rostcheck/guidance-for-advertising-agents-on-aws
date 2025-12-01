@@ -46,9 +46,6 @@ EXPOSE 8080
 EXPOSE 8000
 EXPOSE 9000
 
-# Copy entire project (respecting .dockerignore)
-# COPY . .
-
 # Initialize AgentCore Memory using simplified approach
 RUN echo "Initializing AgentCore Memory..." && \
     python /app/agentcore/shared/memory_init.py || echo "Memory initialization failed, continuing..."
