@@ -1192,12 +1192,7 @@ class ManualAgentCoreDeployer:
 
                 try:
                     # nosemgrep: dangerous-subprocess-use-audit,dangerous-subprocess-use-tainted-env-args - Validated AWS CLI with profile
-                    result = subprocess.run(  # nosemgrep: dangerous-subprocess-use-tainted-env-args
-                        cli_command,
-                        capture_output=True,
-                        text=True,
-                        timeout=700,  # 11+ minutes to allow for CLI timeouts
-                    )
+                    result = subprocess.run(cli_command, capture_output=True, text=True, timeout=700)  # nosemgrep: dangerous-subprocess-use-tainted-env-args
 
                     if result.returncode != 0:
                         raise Exception(

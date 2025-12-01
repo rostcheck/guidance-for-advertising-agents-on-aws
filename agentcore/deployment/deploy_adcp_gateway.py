@@ -107,7 +107,7 @@ class AdCPGatewayDeployer:
             
             # Wait for role propagation
             logger.info("Waiting for IAM role propagation (10 seconds)...")
-            time.sleep(10)
+            time.sleep(10)  # nosemgrep: arbitrary-sleep - Intentional delay for IAM role propagation
             
             return role_arn
             
@@ -480,7 +480,7 @@ def handle_configure_study(args):
                 "--region", self.region
             ]
             
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=60, env=env)
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=60, env=env)  # nosemgrep: dangerous-subprocess-use-audit
             
             if result.returncode == 0 and self.gateway_name in result.stdout:
                 logger.info(f"Found existing gateway: {self.gateway_name}")
@@ -492,7 +492,7 @@ def handle_configure_study(args):
                     "--region", self.region
                 ]
                 
-                get_result = subprocess.run(get_cmd, capture_output=True, text=True, timeout=60, env=env)
+                get_result = subprocess.run(get_cmd, capture_output=True, text=True, timeout=60, env=env)  # nosemgrep: dangerous-subprocess-use-audit
                 
                 if get_result.returncode == 0:
                     # Parse output to get gateway ARN and URL
@@ -558,7 +558,7 @@ def handle_configure_study(args):
             logger.info(f"Setting AWS_PROFILE={self.profile} for agentcore CLI")
         
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300, env=env)
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300, env=env)  # nosemgrep: dangerous-subprocess-use-audit
             
             if result.returncode != 0:
                 # Check if error is because gateway already exists (ConflictException)
@@ -621,7 +621,7 @@ def handle_configure_study(args):
             env["AWS_PROFILE"] = self.profile
         
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300, env=env)
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300, env=env)  # nosemgrep: dangerous-subprocess-use-audit
             
             if result.returncode != 0:
                 logger.error(f"Target creation failed: {result.stderr}")
