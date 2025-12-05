@@ -2254,7 +2254,21 @@ EOF
 create_agentcore_memory() {
     print_status "Creating shared AgentCore memory for all deployed agents..."
     
-     
+    # Setup Python environment with required dependencies
+    setup_python_environment
+    
+    # Install bedrock-agentcore package if not already installed
+    if ! $PYTHON_CMD -c "import bedrock_agentcore" 2>/dev/null; then
+        print_status "Installing bedrock-agentcore package..."
+        $PYTHON_CMD -m pip install bedrock-agentcore --quiet
+        if [ $? -ne 0 ]; then
+            print_warning "⚠️  Failed to install bedrock-agentcore package"
+            print_warning "   Memory functionality may be limited"
+            return 0
+        fi
+        print_success "✅ bedrock-agentcore package installed"
+    fi
+    
     # Create ONE memory record using the simple script
     local memory_script="${PROJECT_ROOT}/agentcore/deployment/create_simple_memory.py"
     if [ ! -f "$memory_script" ]; then
@@ -2843,6 +2857,7 @@ cleanup_ecosystem() {
     print_warning "This will delete ALL resources created by this deployment script."
     print_warning "This action is IRREVERSIBLE and will permanently delete:"
     print_warning "  - All AgentCore agents, runtimes, ECR repositories, and IAM roles"
+    print_warning "  - AdCP MCP Gateway Lambda functions and resources"
     print_warning "  - All knowledge bases and data sources"
     print_warning "  - All S3 bucket contents"
     print_warning "  - All CloudFormation stacks"
@@ -2887,25 +2902,28 @@ cleanup_ecosystem() {
         print_warning "⚠️  AgentCore cleanup had some issues, but continuing with deployment cleanup..."
     fi
     
-    # Step 2: Delete data sources
+    # Step 2: Clean up AdCP MCP Gateway
+    cleanup_adcp_gateway
+    
+    # Step 3: Delete data sources
     cleanup_data_sources
     
-    # Step 3: Delete knowledge bases
+    # Step 4: Delete knowledge bases
     cleanup_knowledge_bases
     
-    # Step 4: Delete vector indices
+    # Step 5: Delete vector indices
     cleanup_vector_indices
     
-    # Step 5: Empty synthetic data bucket
+    # Step 6: Empty synthetic data bucket
     cleanup_synthetic_data_bucket
     
-    # Step 6: Empty UI bucket
+    # Step 7: Empty UI bucket
     cleanup_ui_bucket
     
-    # Step 7: Empty generated content bucket
+    # Step 8: Empty generated content bucket
     cleanup_generated_content_bucket
     
-    # Step 8: Delete infrastructure stack
+    # Step 9: Delete infrastructure stack
     cleanup_infrastructure_stack
     
     # Final cleanup
@@ -2913,6 +2931,79 @@ cleanup_ecosystem() {
     
     print_success "🎉 ECOSYSTEM CLEANUP COMPLETED!"
     print_status "All resources have been successfully removed."
+}
+
+# Function to cleanup AdCP MCP Gateway
+cleanup_adcp_gateway() {
+    print_step "2. Cleaning up AdCP MCP Gateway..."
+    
+    # Check if gateway info file exists
+    local gateway_info_file="${PROJECT_ROOT}/.adcp-gateway-${STACK_PREFIX}-${UNIQUE_ID}.json"
+    
+    if [ ! -f "$gateway_info_file" ]; then
+        print_status "No AdCP Gateway deployment found, skipping..."
+        return 0
+    fi
+    
+    printf "Delete AdCP MCP Gateway Lambda function for stack ${STACK_PREFIX}-${UNIQUE_ID}? (y/N): "
+    read -r response
+    if [[ ! "$response" =~ ^[Yy]$ ]]; then
+        print_status "Skipping AdCP Gateway cleanup"
+        return 0
+    fi
+    
+    # Delete Lambda function
+    local lambda_name="${STACK_PREFIX}-adcp-handler-${UNIQUE_ID}"
+    print_status "Deleting Lambda function: $lambda_name"
+    
+    if aws_cmd lambda delete-function --function-name "$lambda_name" --region "$AWS_REGION" 2>/dev/null; then
+        print_success "✅ Lambda function deleted: $lambda_name"
+    else
+        print_warning "⚠️  Lambda function not found or already deleted: $lambda_name"
+    fi
+    
+    # Delete SSM parameter
+    local ssm_param_name="/${STACK_PREFIX}/adcp_gateway/${UNIQUE_ID}"
+    print_status "Deleting SSM parameter: $ssm_param_name"
+    
+    if aws_cmd ssm delete-parameter --name "$ssm_param_name" --region "$AWS_REGION" 2>/dev/null; then
+        print_success "✅ SSM parameter deleted: $ssm_param_name"
+    else
+        print_warning "⚠️  SSM parameter not found or already deleted: $ssm_param_name"
+    fi
+    
+    # Delete IAM role for Lambda
+    local role_name="${STACK_PREFIX}-adcp-lambda-role-${UNIQUE_ID}"
+    print_status "Deleting IAM role: $role_name"
+    
+    # First detach policies
+    local attached_policies=$(aws_cmd iam list-attached-role-policies --role-name "$role_name" --query 'AttachedPolicies[*].PolicyArn' --output text 2>/dev/null || echo "")
+    for policy_arn in $attached_policies; do
+        if [ -n "$policy_arn" ]; then
+            aws_cmd iam detach-role-policy --role-name "$role_name" --policy-arn "$policy_arn" 2>/dev/null || true
+        fi
+    done
+    
+    # Delete inline policies
+    local inline_policies=$(aws_cmd iam list-role-policies --role-name "$role_name" --query 'PolicyNames[*]' --output text 2>/dev/null || echo "")
+    for policy_name in $inline_policies; do
+        if [ -n "$policy_name" ]; then
+            aws_cmd iam delete-role-policy --role-name "$role_name" --policy-name "$policy_name" 2>/dev/null || true
+        fi
+    done
+    
+    # Delete the role
+    if aws_cmd iam delete-role --role-name "$role_name" 2>/dev/null; then
+        print_success "✅ IAM role deleted: $role_name"
+    else
+        print_warning "⚠️  IAM role not found or already deleted: $role_name"
+    fi
+    
+    # Remove local tracking file
+    rm -f "$gateway_info_file"
+    print_success "✅ AdCP Gateway cleanup completed"
+    
+    return 0
 }
 
 # Function to cleanup AgentCore agents and resources
@@ -3800,14 +3891,14 @@ confirm_deployment_steps() {
     echo ""
     
     local steps=(
-        "Step 1: Check and adjust AWS service quotas"
-        "Step 2: Deploy infrastructure (Core: S3, OpenSearch, Cognito; Services: Lambda, DynamoDB)"
-        "Step 3: Deploy Lambda functions and migrate visualization data"
-        "Step 4: Deploy knowledge bases with organized data sources"
-        "Step 5: Sync data sources (start ingestion jobs)"
-        "Step 6: Detect and deploy AgentCore agents"
-        "Step 7: Deploy AdCP MCP Gateway for agent collaboration"
-        "Step 8: Generate UI configuration"
+        "Phase 1: Check and adjust AWS service quotas"
+        "Phase 2: Deploy infrastructure (Core: S3, OpenSearch, Cognito; Services: Lambda, DynamoDB)"
+        "Phase 3: Deploy Lambda functions and migrate visualization data"
+        "Phase 4: Deploy knowledge bases with organized data sources"
+        "Phase 5: Sync data sources (start ingestion jobs)"
+        "Phase 6: Detect and deploy AgentCore agents"
+        "Phase 7: Deploy AdCP MCP Gateway for agent collaboration"
+        "Phase 8: Generate UI configuration"
     )
     
     print_status "The following steps will be executed:"
@@ -3894,15 +3985,15 @@ main() {
     # Initialize unique ID
     initialize_unique_id
     
-    # DEPLOYMENT STEPS:
-    # Step 1: Check and adjust AWS service quotas
-    # Step 2: Deploy infrastructure (Core: S3, OpenSearch, Cognito; Services: Lambda, DynamoDB)
-    # Step 3: Deploy Lambda functions and migrate visualization data
-    # Step 4: Deploy knowledge bases with organized data sources
-    # Step 5: Sync data sources (start ingestion jobs)
-    # Step 6: Detect and deploy AgentCore agents
-    # Step 7: Deploy AdCP MCP Gateway for agent collaboration
-    # Step 8: Generate UI configuration
+    # DEPLOYMENT PHASES:
+    # Phase 1: Check and adjust AWS service quotas
+    # Phase 2: Deploy infrastructure (Core: S3, OpenSearch, Cognito; Services: Lambda, DynamoDB)
+    # Phase 3: Deploy Lambda functions and migrate visualization data
+    # Phase 4: Deploy knowledge bases with organized data sources
+    # Phase 5: Sync data sources (start ingestion jobs)
+    # Phase 6: Detect and deploy AgentCore agents
+    # Phase 7: Deploy AdCP MCP Gateway for agent collaboration
+    # Phase 8: Generate UI configuration
     
     # Pre-deployment validation
     if [ "$RESUME_AT_STEP" -le 1 ]; then

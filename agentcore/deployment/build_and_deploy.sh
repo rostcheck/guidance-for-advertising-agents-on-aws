@@ -815,6 +815,20 @@ if [ -n "$EXISTING_RUNTIME_ID" ] && [ "$EXISTING_RUNTIME_ID" != "None" ] && [ "$
         print_status "✅ AgentCore runtime '$EXISTING_RUNTIME_ID' updated successfully!"
         print_status "Agent: $AGENT_NAME (runtime: $RUNTIME_NAME)"
         print_status "Container URI: $ECR_URI:latest"
+        
+        # Configure X-Ray trace segment destination for CloudWatch Logs (fixes OTLP export error)
+        print_status "Configuring X-Ray trace segment destination for CloudWatch Logs..."
+        if [ -n "$AWS_PROFILE" ]; then
+            aws xray update-trace-segment-destination \
+                --destination CloudWatchLogs \
+                --profile "$AWS_PROFILE" \
+                --region "$AWS_REGION" 2>/dev/null || print_warning "⚠️  Could not update trace segment destination (may already be configured or not supported)"
+        else
+            aws xray update-trace-segment-destination \
+                --destination CloudWatchLogs \
+                --region "$AWS_REGION" 2>/dev/null || print_warning "⚠️  Could not update trace segment destination (may already be configured or not supported)"
+        fi
+        print_status "✅ X-Ray trace segment destination configured"
     else
         print_error "Failed to update AgentCore runtime"
         exit 1
@@ -852,6 +866,20 @@ else
     if [ $? -eq 0 ]; then
         print_status "✅ AgentCore agent '$AGENT_NAME' deployed successfully as '$FULL_AGENT_NAME'!"
         print_status "Container URI: $ECR_URI:latest"
+        
+        # Configure X-Ray trace segment destination for CloudWatch Logs (fixes OTLP export error)
+        print_status "Configuring X-Ray trace segment destination for CloudWatch Logs..."
+        if [ -n "$AWS_PROFILE" ]; then
+            aws xray update-trace-segment-destination \
+                --destination CloudWatchLogs \
+                --profile "$AWS_PROFILE" \
+                --region "$AWS_REGION" 2>/dev/null || print_warning "⚠️  Could not update trace segment destination (may already be configured or not supported)"
+        else
+            aws xray update-trace-segment-destination \
+                --destination CloudWatchLogs \
+                --region "$AWS_REGION" 2>/dev/null || print_warning "⚠️  Could not update trace segment destination (may already be configured or not supported)"
+        fi
+        print_status "✅ X-Ray trace segment destination configured"
         
         # Register runtime in A2A registry with bearer token (if A2A agent)
         if [ -n "$A2A_BEARER_TOKEN" ]; then

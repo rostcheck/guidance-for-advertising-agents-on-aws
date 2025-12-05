@@ -1047,9 +1047,37 @@ graph TD
         Infra --> P4[Phase 4: Knowledge Base Creation<br/>& OpenSearch Index]
         Infra --> P5[Phase 5: Data Source Ingestion<br/>Sync]
         Infra --> P6[Phase 6: AgentCore Container<br/>Deployment]
-        Infra --> P7[Phase 7: UI Configuration<br/>Generation & Deployment]
+        Infra --> P7[Phase 7: AdCP MCP Gateway<br/>Deployment]
+        Infra --> P8[Phase 8: UI Configuration<br/>Generation & Deployment]
     end
 ```
+
+### AdCP MCP Gateway Integration
+
+The ecosystem includes an **AdCP MCP Gateway** (deployed in Phase 7) that provides standardized advertising protocol tools for agent collaboration:
+
+**AdCP Media Buy Protocol:**
+- `adcp_get_products`: Discover publisher inventory matching campaign brief
+- `adcp_create_media_buy`: Create media buy with publisher packages
+- `adcp_get_media_buy_delivery`: Get delivery metrics for a media buy
+
+**AdCP Signals Protocol:**
+- `adcp_get_signals`: Discover audience and contextual signals
+- `adcp_activate_signal`: Activate segment on DSP platform
+
+**MCP Services:**
+- `mcp_verify_brand_safety`: Verify brand safety for properties
+- `mcp_resolve_audience_reach`: Estimate cross-device reach
+- `mcp_configure_brand_lift_study`: Configure measurement study
+
+**Gateway Architecture:**
+```
+Agent → adcp_tools.py → HTTP → AgentCore Gateway → Lambda Handler → AdCP Protocol
+```
+
+The gateway supports two modes:
+1. **Fallback Mode** (Default): Uses hardcoded mock data directly in the tools
+2. **MCP Mode**: Connects to a real MCP server (local or via AgentCore Gateway)
 
 ### Success Metrics
 

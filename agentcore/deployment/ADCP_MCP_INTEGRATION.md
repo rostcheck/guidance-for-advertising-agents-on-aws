@@ -104,7 +104,7 @@ export ADCP_GATEWAY_URL=https://your-gateway-url.bedrock-agentcore.us-east-1.ama
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `ADCP_USE_MCP` | Enable MCP integration | `false` |
+| `ADCP_USE_MCP` | Enable MCP integration | `true` |
 | `ADCP_GATEWAY_URL` | AgentCore Gateway URL | None |
 | `ADCP_MCP_SERVER_PATH` | Path to local MCP server | Auto-detected |
 | `ADCP_AUTH_TOKEN` | Auth token for gateway | None |

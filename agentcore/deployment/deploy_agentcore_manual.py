@@ -47,6 +47,7 @@ class ManualAgentCoreDeployer:
                 if self._upgrade_boto3():
                     # Reload boto3 after upgrade
                     import importlib
+
                     importlib.reload(boto3)
 
                     # Recreate session with upgraded boto3
@@ -122,12 +123,13 @@ class ManualAgentCoreDeployer:
         """Validate AWS profile name to prevent command injection"""
         if not profile:
             raise ValueError("Profile name cannot be empty")
-        
+
         # Only allow alphanumeric, hyphens, underscores, and dots
         import re
-        if not re.match(r'^[a-zA-Z0-9._-]+$', profile):
+
+        if not re.match(r"^[a-zA-Z0-9._-]+$", profile):
             raise ValueError(f"Invalid AWS profile name: {profile}")
-        
+
         return profile
 
     def _upgrade_boto3(self) -> bool:
@@ -206,15 +208,19 @@ class ManualAgentCoreDeployer:
                 # Try to upgrade AWS CLI
                 # On macOS with Homebrew
                 if (
-                    subprocess.run(["which", "brew"], capture_output=True).returncode  # nosemgrep: dangerous-subprocess-use-audit
+                    subprocess.run(
+                        ["which", "brew"], capture_output=True
+                    ).returncode  # nosemgrep: dangerous-subprocess-use-audit
                     == 0
                 ):
                     logger.info("Detected Homebrew, upgrading AWS CLI via brew...")
-                    upgrade_result = subprocess.run(  # nosemgrep: dangerous-subprocess-use-audit
-                        ["brew", "upgrade", "awscli"],
-                        capture_output=True,
-                        text=True,
-                        timeout=300,  # 5 minutes
+                    upgrade_result = (
+                        subprocess.run(  # nosemgrep: dangerous-subprocess-use-audit
+                            ["brew", "upgrade", "awscli"],
+                            capture_output=True,
+                            text=True,
+                            timeout=300,  # 5 minutes
+                        )
                     )
                     if upgrade_result.returncode == 0:
                         logger.info("✅ Successfully upgraded AWS CLI via Homebrew")
@@ -239,11 +245,13 @@ class ManualAgentCoreDeployer:
 
                 # Try pip upgrade as fallback
                 logger.info("Attempting to upgrade AWS CLI via pip...")
-                pip_upgrade = subprocess.run(  # nosemgrep: dangerous-subprocess-use-audit
-                    ["pip3", "install", "--upgrade", "awscli"],
-                    capture_output=True,
-                    text=True,
-                    timeout=300,
+                pip_upgrade = (
+                    subprocess.run(  # nosemgrep: dangerous-subprocess-use-audit
+                        ["pip3", "install", "--upgrade", "awscli"],
+                        capture_output=True,
+                        text=True,
+                        timeout=300,
+                    )
                 )
 
                 if pip_upgrade.returncode == 0:
@@ -583,6 +591,16 @@ class ManualAgentCoreDeployer:
                     },
                 },
                 {
+                    "Sid": "ECRAuthToken",
+                    "Effect": "Allow",
+                    "Action": ["ecr:GetAuthorizationToken","ecr:BatchCheckLayerAvailability",
+                        "ecr:GetDownloadUrlForLayer",
+                        "ecr:BatchGetImage","ecr:DescribeRepositories",
+                        "ecr:DescribeImages",
+                        "ecr:ListImages"],
+                    "Resource": "*",
+                },
+                {
                     "Sid": "ECRRepositoryAccess",
                     "Effect": "Allow",
                     "Action": [
@@ -593,23 +611,15 @@ class ManualAgentCoreDeployer:
                         "ecr:DescribeImages",
                         "ecr:ListImages",
                     ],
-                    "Resource": [f"arn:aws:ecr:{self.region}:{account_id}:repository/*"],
+                    "Resource": [f"arn:aws:ecr:*:{account_id}:repository/*"],
                 },
                 {
                     "Sid": "GenerateImagesLambda",
                     "Effect": "Allow",
-                    "Action": [
-                        "lambda:InvokeFunction"
+                    "Action": ["lambda:InvokeFunction"],
+                    "Resource": [
+                        f"arn:aws:lambda:{self.region}:{account_id}:function:{stack_prefix}-CreativeImageGenerator-*"
                     ],
-                    "Resource": [f"arn:aws:lambda:{self.region}:{account_id}:function:{stack_prefix}-CreativeImageGenerator-*"]
-                },
-                {
-                    "Sid": "ECRAuthorizationToken",
-                    "Effect": "Allow",
-                    "Action": [
-                        "ecr:GetAuthorizationToken",
-                    ],
-                    "Resource": "*",
                 },
                 {
                     "Effect": "Allow",
@@ -663,12 +673,21 @@ class ManualAgentCoreDeployer:
                         "bedrock:RetrieveAndGenerate",
                         "bedrock:ListFoundationModels",
                         "bedrock:ListKnowledgeBases",
-                        "bedrock:ListDataSources"
+                        "bedrock:ListDataSources",
                     ],
-                    "Resource": [
-                        "arn:aws:bedrock:*::*/*",
-                        "arn:aws:bedrock:*:*:*"
+                    "Resource": ["arn:aws:bedrock:*::*/*", "arn:aws:bedrock:*:*:*"],
+                },
+                {
+                    "Sid": "AgentCoreAccess",
+                    "Effect": "Allow",
+                    "Action": [
+                        "bedrock-agentcore:*Gateway*",
+                        "bedrock-agentcore:*WorkloadIdentity",
+                        "bedrock-agentcore:*CredentialProvider",
+                        "bedrock-agentcore:*Token*",
+                        "bedrock-agentcore:*Access*",
                     ],
+                    "Resource": f"arn:aws:bedrock-agentcore:*:{account_id}:*gateway*",
                 },
                 {
                     "Effect": "Allow",
@@ -694,7 +713,6 @@ class ManualAgentCoreDeployer:
                 },
             ],
         }
-
 
         try:
             response = self.iam_client.create_role(
@@ -727,11 +745,15 @@ class ManualAgentCoreDeployer:
             try:
                 self.iam_client.attach_role_policy(
                     RoleName=role_name,
-                    PolicyArn="arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess"
+                    PolicyArn="arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess",
                 )
-                logger.info(f"Attached AWSXRayDaemonWriteAccess policy to role: {role_name}")
+                logger.info(
+                    f"Attached AWSXRayDaemonWriteAccess policy to role: {role_name}"
+                )
             except Exception as e:
-                logger.warning(f"Could not attach X-Ray policy (may already be attached): {e}")
+                logger.warning(
+                    f"Could not attach X-Ray policy (may already be attached): {e}"
+                )
 
             # Wait for IAM policy propagation
             logger.info("Waiting 30 seconds for IAM policy propagation...")
@@ -750,7 +772,7 @@ class ManualAgentCoreDeployer:
                 policy_name = f"{role_name}-Policy"
                 policy_arn = f"arn:aws:iam::{account_id}:policy/{policy_name}"
 
-                # Create policy if it doesn't exist
+                # Create policy if it doesn't exist, or update if it does
                 try:
                     self.iam_client.create_policy(
                         PolicyName=policy_name,
@@ -759,7 +781,34 @@ class ManualAgentCoreDeployer:
                     )
                     logger.info(f"Created policy for existing role: {policy_name}")
                 except self.iam_client.exceptions.EntityAlreadyExistsException:
-                    logger.info(f"Policy already exists: {policy_name}")
+                    logger.info(f"Policy already exists: {policy_name}, updating with latest permissions...")
+                    # Update the existing policy with a new version
+                    try:
+                        # List policy versions and delete old ones if at limit (max 5 versions)
+                        versions_response = self.iam_client.list_policy_versions(PolicyArn=policy_arn)
+                        versions = versions_response.get("Versions", [])
+                        non_default_versions = [v for v in versions if not v.get("IsDefaultVersion", False)]
+                        
+                        # Delete oldest non-default versions if we're at the limit
+                        if len(versions) >= 5:
+                            # Sort by create date and delete oldest non-default
+                            non_default_versions.sort(key=lambda x: x.get("CreateDate", ""))
+                            for old_version in non_default_versions[:len(versions) - 4]:
+                                self.iam_client.delete_policy_version(
+                                    PolicyArn=policy_arn,
+                                    VersionId=old_version["VersionId"]
+                                )
+                                logger.info(f"Deleted old policy version: {old_version['VersionId']}")
+                        
+                        # Create new policy version and set as default
+                        self.iam_client.create_policy_version(
+                            PolicyArn=policy_arn,
+                            PolicyDocument=json.dumps(permissions_policy),
+                            SetAsDefault=True
+                        )
+                        logger.info(f"Updated policy with new version: {policy_name}")
+                    except Exception as update_error:
+                        logger.warning(f"Could not update policy version: {update_error}")
 
                 # Try to attach the policy
                 try:
@@ -777,12 +826,19 @@ class ManualAgentCoreDeployer:
                 try:
                     self.iam_client.attach_role_policy(
                         RoleName=role_name,
-                        PolicyArn="arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess"
+                        PolicyArn="arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess",
                     )
-                    logger.info(f"Attached AWSXRayDaemonWriteAccess policy to existing role: {role_name}")
+                    logger.info(
+                        f"Attached AWSXRayDaemonWriteAccess policy to existing role: {role_name}"
+                    )
                 except Exception as e:
-                    if "is already attached" in str(e).lower() or "already attached" in str(e).lower():
-                        logger.info(f"X-Ray policy already attached to role: {role_name}")
+                    if (
+                        "is already attached" in str(e).lower()
+                        or "already attached" in str(e).lower()
+                    ):
+                        logger.info(
+                            f"X-Ray policy already attached to role: {role_name}"
+                        )
                     else:
                         logger.warning(f"Could not attach X-Ray policy: {e}")
 
@@ -885,7 +941,7 @@ class ManualAgentCoreDeployer:
                                     f"Skipping partial match '{actual_name}' - unique_id '{unique_id}' not found"
                                 )
                                 continue
-                        
+
                         logger.info(
                             f"Found partial match for '{variation}' in '{actual_name}': {runtime['agentRuntimeId']}"
                         )
@@ -968,7 +1024,7 @@ class ManualAgentCoreDeployer:
                             f"Skipping base name match '{actual_name}' - unique_id '{unique_id}' not found"
                         )
                         continue
-                    
+
                     logger.info(
                         f"Found base name match for '{base_name}' in '{actual_name}': {runtime['agentRuntimeId']}"
                     )
@@ -1192,7 +1248,9 @@ class ManualAgentCoreDeployer:
 
                 try:
                     # nosemgrep: dangerous-subprocess-use-audit,dangerous-subprocess-use-tainted-env-args - Validated AWS CLI with profile
-                    result = subprocess.run(cli_command, capture_output=True, text=True, timeout=700)  # nosemgrep: dangerous-subprocess-use-tainted-env-args
+                    result = subprocess.run(
+                        cli_command, capture_output=True, text=True, timeout=700
+                    )  # nosemgrep: dangerous-subprocess-use-tainted-env-args
 
                     if result.returncode != 0:
                         raise Exception(
@@ -1308,99 +1366,105 @@ class ManualAgentCoreDeployer:
         role_arn: str,
         stack_prefix: str = None,
         unique_id: str = None,
+        max_retries: int = 5,
+        retry_delay: int = 15,
     ) -> str:
         """Update existing AgentCore agent runtime with new container image"""
         logger.info(f"Updating AgentCore runtime: {runtime_id}")
         logger.info(f"  New container URI: {container_uri}")
         logger.info(f"  Role ARN: {role_arn}")
 
-        try:
-            # Gather environment variables for the container
-            kb_env_value = ""
-            runtime_env_value = ""
-            if stack_prefix and unique_id:
-                kb_env_value = self.gather_knowledge_base_ids(stack_prefix, unique_id)
-
-                # Get RUNTIMES with bearer tokens from runtime registry
-                from runtime_registry import RuntimeRegistry
-
-                project_root = os.path.dirname(
-                    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-                )
-                registry = RuntimeRegistry(stack_prefix, unique_id, project_root)
-                runtime_env_value = registry.build_runtimes_env_value()
-                logger.info(
-                    f"RUNTIMES environment variable (with bearer tokens): {runtime_env_value[:100]}... (truncated)"
-                )
-
-            # Prepare container configuration (without environment variables)
-            container_config = {
-                "containerConfiguration": {
-                    "containerUri": container_uri,
-                }
-            }
-
-            # Get AppSync endpoint from infrastructure stack
-            appsync_endpoint = self.get_appsync_endpoint(stack_prefix, unique_id)
-            if appsync_endpoint:
-                logger.info(f"AppSync endpoint: {appsync_endpoint}")
-            else:
-                logger.warning(
-                    "AppSync endpoint not found - real-time updates will be disabled"
-                )
-
-            # Prepare environment variables as separate parameter
-            env_vars = {
-                "STACK_PREFIX": stack_prefix or "",
-                "UNIQUE_ID": unique_id or "",
-                "KNOWLEDGEBASES": kb_env_value,
-                "RUNTIMES": runtime_env_value,
-            }
-
-            # Add AppSync endpoint if available
-            if appsync_endpoint:
-                env_vars["APPSYNC_ENDPOINT"] = appsync_endpoint
-
-            # Use AWS CLI with 10-minute timeouts for update operations
-            cli_command = [
-                "aws",
-                "bedrock-agentcore-control",
-                "update-agent-runtime",
-                "--agent-runtime-id",
-                runtime_id,
-                "--agent-runtime-artifact",
-                json.dumps(container_config),
-                "--environment-variables",
-                json.dumps(env_vars),
-                "--network-configuration",
-                json.dumps({"networkMode": "PUBLIC"}),
-                "--role-arn",
-                role_arn,
-                "--description",
-                "Updated agent runtime with new container image and environment variables",
-                "--region",
-                self.agentcore_region,
-                "--cli-read-timeout",
-                "600",  # 10 minutes
-                "--cli-connect-timeout",
-                "600",  # 10 minutes
-                "--output",
-                "json",
-            ]
-
-            # Add profile if specified
-            if hasattr(self, "_profile") and self._profile:
-                # Security: Validate profile name before using in subprocess
-                validated_profile = self._validate_aws_profile(self._profile)
-                cli_command.extend(["--profile", validated_profile])
-
-            logger.info(f"Executing CLI update command with 10-minute timeouts...")
-            logger.info(f"Command: {' '.join(cli_command[:10])}... (truncated)")
-            logger.debug(f"Full command: {cli_command}")
-            logger.debug(f"Container config: {json.dumps(container_config, indent=2)}")
-            logger.debug(f"Environment vars: {json.dumps(env_vars, indent=2)}")
-
+        for attempt in range(max_retries):
             try:
+                # Gather environment variables for the container
+                kb_env_value = ""
+                runtime_env_value = ""
+                if stack_prefix and unique_id:
+                    kb_env_value = self.gather_knowledge_base_ids(
+                        stack_prefix, unique_id
+                    )
+
+                    # Get RUNTIMES with bearer tokens from runtime registry
+                    from runtime_registry import RuntimeRegistry
+
+                    project_root = os.path.dirname(
+                        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                    )
+                    registry = RuntimeRegistry(stack_prefix, unique_id, project_root)
+                    runtime_env_value = registry.build_runtimes_env_value()
+                    logger.info(
+                        f"RUNTIMES environment variable (with bearer tokens): {runtime_env_value[:100]}... (truncated)"
+                    )
+
+                # Prepare container configuration (without environment variables)
+                container_config = {
+                    "containerConfiguration": {
+                        "containerUri": container_uri,
+                    }
+                }
+
+                # Get AppSync endpoint from infrastructure stack
+                appsync_endpoint = self.get_appsync_endpoint(stack_prefix, unique_id)
+                if appsync_endpoint:
+                    logger.info(f"AppSync endpoint: {appsync_endpoint}")
+                else:
+                    logger.warning(
+                        "AppSync endpoint not found - real-time updates will be disabled"
+                    )
+
+                # Prepare environment variables as separate parameter
+                env_vars = {
+                    "STACK_PREFIX": stack_prefix or "",
+                    "UNIQUE_ID": unique_id or "",
+                    "KNOWLEDGEBASES": kb_env_value,
+                    "RUNTIMES": runtime_env_value,
+                }
+
+                # Add AppSync endpoint if available
+                if appsync_endpoint:
+                    env_vars["APPSYNC_ENDPOINT"] = appsync_endpoint
+
+                # Use AWS CLI with 10-minute timeouts for update operations
+                cli_command = [
+                    "aws",
+                    "bedrock-agentcore-control",
+                    "update-agent-runtime",
+                    "--agent-runtime-id",
+                    runtime_id,
+                    "--agent-runtime-artifact",
+                    json.dumps(container_config),
+                    "--environment-variables",
+                    json.dumps(env_vars),
+                    "--network-configuration",
+                    json.dumps({"networkMode": "PUBLIC"}),
+                    "--role-arn",
+                    role_arn,
+                    "--description",
+                    "Updated agent runtime with new container image and environment variables",
+                    "--region",
+                    self.agentcore_region,
+                    "--cli-read-timeout",
+                    "600",  # 10 minutes
+                    "--cli-connect-timeout",
+                    "600",  # 10 minutes
+                    "--output",
+                    "json",
+                ]
+
+                # Add profile if specified
+                if hasattr(self, "_profile") and self._profile:
+                    # Security: Validate profile name before using in subprocess
+                    validated_profile = self._validate_aws_profile(self._profile)
+                    cli_command.extend(["--profile", validated_profile])
+
+                logger.info(f"Executing CLI update command with 10-minute timeouts...")
+                logger.info(f"Command: {' '.join(cli_command[:10])}... (truncated)")
+                logger.debug(f"Full command: {cli_command}")
+                logger.debug(
+                    f"Container config: {json.dumps(container_config, indent=2)}"
+                )
+                logger.debug(f"Environment vars: {json.dumps(env_vars, indent=2)}")
+
                 # nosemgrep: dangerous-subprocess-use-audit - Validated AWS CLI update
                 result = subprocess.run(
                     cli_command,
@@ -1422,6 +1486,9 @@ class ManualAgentCoreDeployer:
 
                 response = json.loads(result.stdout)
 
+                logger.info(f"✅ Updated AgentCore runtime: {runtime_id}")
+                return runtime_id
+
             except subprocess.TimeoutExpired:
                 raise Exception("CLI update command timed out after 11+ minutes")
             except json.JSONDecodeError as e:
@@ -1433,16 +1500,31 @@ class ManualAgentCoreDeployer:
                 logger.error(error_msg)
                 raise Exception(error_msg)
             except Exception as e:
-                if "exit code" not in str(e):  # Don't double-wrap our own exceptions
-                    logger.error(f"CLI update execution failed: {e}")
-                raise
+                error_msg = str(e)
+                logger.error(f"Update attempt {attempt + 1} failed: {error_msg}")
 
-            logger.info(f"✅ Updated AgentCore runtime: {runtime_id}")
-            return runtime_id
-
-        except Exception as e:
-            logger.error(f"Failed to update agent runtime {runtime_id}: {str(e)}")
-            raise
+                # Check for IAM propagation issues (ECR validation failures)
+                if (
+                    "Access denied" in error_msg or "ValidationException" in error_msg
+                ) and attempt < max_retries - 1:
+                    if "ECR URI" in error_msg:
+                        logger.info(
+                            f"ECR validation failed, likely due to IAM propagation delay. "
+                            f"Waiting {retry_delay} seconds before retry ({attempt + 2}/{max_retries})..."
+                        )
+                    else:
+                        logger.info(
+                            f"IAM permissions may still be propagating. "
+                            f"Waiting {retry_delay} seconds before retry ({attempt + 2}/{max_retries})..."
+                        )
+                    # nosemgrep: arbitrary-sleep - Intentional retry backoff for IAM propagation
+                    time.sleep(retry_delay)
+                    continue
+                else:
+                    logger.error(
+                        f"Failed to update agent runtime {runtime_id} after {attempt + 1} attempts: {error_msg}"
+                    )
+                    raise
 
     def ensure_fresh_config_for_build(
         self,
@@ -1935,7 +2017,13 @@ class ManualAgentCoreDeployer:
                 principal = statement.get("Principal", {})
                 if isinstance(principal, dict):
                     service = principal.get("Service", "")
-                    if (isinstance(service, str) and service == "bedrock-agentcore.amazonaws.com") or (isinstance(service, list) and "bedrock-agentcore.amazonaws.com" in service):
+                    if (
+                        isinstance(service, str)
+                        and service == "bedrock-agentcore.amazonaws.com"
+                    ) or (
+                        isinstance(service, list)
+                        and "bedrock-agentcore.amazonaws.com" in service
+                    ):
                         logger.info("✅ Role trust policy allows AgentCore service")
                         return True
 

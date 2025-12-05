@@ -11,7 +11,7 @@ Protocols Implemented:
 - MCP Services: verify_brand_safety, resolve_audience_reach, configure_brand_lift_study
 
 Environment Variables:
-- ADCP_USE_MCP: Set to "true" to use MCP server (default: "false" for fallback)
+- ADCP_USE_MCP: Set to "false" to disable MCP and use fallback (default: "true" for MCP)
 - ADCP_GATEWAY_URL: URL for AgentCore MCP Gateway (enables HTTP transport)
 - ADCP_MCP_SERVER_PATH: Path to local MCP server script (for stdio transport)
 
@@ -27,7 +27,7 @@ from strands import tool
 logger = logging.getLogger(__name__)
 
 # Configuration
-USE_MCP = os.environ.get("ADCP_USE_MCP", "false").lower() == "true"
+USE_MCP = os.environ.get("ADCP_USE_MCP", "true").lower() == "true"
 MCP_GATEWAY_URL = os.environ.get("ADCP_GATEWAY_URL")
 MCP_SERVER_PATH = os.environ.get("ADCP_MCP_SERVER_PATH")
 

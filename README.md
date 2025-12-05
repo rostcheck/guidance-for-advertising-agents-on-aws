@@ -248,7 +248,7 @@ This Guidance is optimized for regions with full Amazon Bedrock AgentCore suppor
 
 ## Deployment Steps 
 
-The deployment process uses a single comprehensive script that handles all infrastructure, AgentCore containers, knowledge bases, and UI configuration automatically in 7 phases:
+The deployment process uses a single comprehensive script that handles all infrastructure, AgentCore containers, knowledge bases, and UI configuration automatically in 8 phases:
 
 1. **Phase 1**: Environment checks and validation
 2. **Phase 2**: Infrastructure setup (S3, Demo User, OpenSearch Collection)
@@ -256,7 +256,8 @@ The deployment process uses a single comprehensive script that handles all infra
 4. **Phase 4**: Knowledge base & OpenSearch Index creation with synthetic data
 5. **Phase 5**: Knowledge base data source ingestion (sync)
 6. **Phase 6**: AgentCore container deployment
-7. **Phase 7**: UI configuration generation and deployment
+7. **Phase 7**: AdCP MCP Gateway deployment for agent collaboration
+8. **Phase 8**: UI configuration generation and deployment
 
 ### Prerequisites Setup
 
@@ -348,7 +349,8 @@ The deployment script automatically handles:
 - **Phase 4**: Knowledge base & Opensearch Index creation with synthetic data
 - **Phase 5**: Knowledge base data source ingestion (sync)
 - **Phase 6**: AgentCore container deployment
-- **Phase 7**: UI configuration generation and deployment
+- **Phase 7**: AdCP MCP Gateway deployment for agent collaboration
+- **Phase 8**: UI configuration generation and deployment
 
 If you are partially through the deployment process and want to recover from an error, use below configurations for the deployment script so that it handles idempotency. You can find the unique Id from a config file that the script creates during the initial run, ex: `.unique-id-agnt4ad-us-east-1`. The name of the file depends on stack-prefix and region.
 
@@ -360,7 +362,8 @@ If you are partially through the deployment process and want to recover from an 
 # Phase 4: Knowledge base & Opensearch Index creation with synthetic data
 # Phase 5: Knowledge base data source ingestion (sync)
 # Phase 6: AgentCore container deployment
-# Phase 7: UI configuration generation and deployment
+# Phase 7: AdCP MCP Gateway deployment for agent collaboration
+# Phase 8: UI configuration generation and deployment
 
 ./scripts/deploy-ecosystem.sh \
   --stack-prefix agnt4ad \
@@ -655,6 +658,39 @@ aws cognito-idp admin-create-user \
 
 ### 2. External API Integration
 
+  **AdCP MCP Gateway (Ad Context Protocol):**
+  The ecosystem includes an AdCP MCP Gateway that provides standardized advertising protocol tools for agent collaboration. The gateway is automatically deployed in Phase 7 and provides:
+  
+  - **AdCP Media Buy Protocol**: Discover publisher inventory, create media buys, track delivery metrics
+  - **AdCP Signals Protocol**: Discover and activate audience/contextual signals
+  - **MCP Services**: Brand safety verification, audience reach resolution, measurement configuration
+
+  <iframe src="https://d2ug0k696238iq.cloudfront.net/" width="100%" height="800" frameborder="0" allowfullscreen></iframe>
+
+
+  **Gateway Architecture:**
+  ```
+  Agent → adcp_tools.py → HTTP → AgentCore Gateway → Lambda Handler → AdCP Protocol
+  ```
+
+  **Environment Variables (auto-configured during deployment):**
+  | Variable | Description |
+  |----------|-------------|
+  | `ADCP_USE_MCP` | Enable MCP integration (default: true). Set to "false" to use fallback mock data |
+  | `ADCP_GATEWAY_URL` | AgentCore Gateway URL (set automatically) |
+
+  **Testing the Gateway:**
+  ```bash
+  # Test direct handlers locally
+  cd synthetic_data/mcp_mocks
+  python test_adcp_server.py
+
+  # Test MCP server with SSE transport
+  python adcp_mcp_server.py --transport sse --port 8080
+  ```
+
+  For detailed integration documentation, see `agentcore/deployment/ADCP_MCP_INTEGRATION.md`.
+
   **WeatherImpactAnalysis Agent API Key:**
   The WeatherImpactAnalysis agent integrates with Visual Crossing Weather API to provide weather-based campaign insights. By default, the agent works with US locations, but for international locations, you'll need to configure a valid API key.
 
@@ -765,7 +801,7 @@ aws cognito-idp admin-create-user \
       --stack-prefix agnt4ad \
       --region us-east-1 \
       --profile agnts4ad \
-      --resume-at 7
+      --resume-at 8
   ```
 
 ### 5. Add Custom Visualizations
@@ -933,6 +969,7 @@ The deployment script includes comprehensive cleanup functionality:
 
 The automated cleanup removes:
 - **AgentCore containers and runtimes**
+- **AdCP MCP Gateway Lambda functions and resources**
 - **All CloudFormation stacks**
 - **S3 buckets and contents**
 - **ECR repositories and images**
