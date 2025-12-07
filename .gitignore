@@ -122,3 +122,4 @@ licenses.txt
 agentcore/deployment/agent/my_test_results.txt
 !synthetic_data/mcp_mocks/test_adcp_server.py
 system reference
+scripts/set_credentials_isengard_script.sh
