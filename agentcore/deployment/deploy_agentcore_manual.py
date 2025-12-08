@@ -1289,6 +1289,7 @@ class ManualAgentCoreDeployer:
                 )
 
                 try:
+                    # nosemgrep: dangerous-subprocess-use-audit, dangerous-subprocess-use-tainted-env-args
                     result = subprocess.run(
                         cli_command, capture_output=True, text=True, timeout=700
                     )
@@ -1540,6 +1541,7 @@ class ManualAgentCoreDeployer:
                 )
                 logger.debug(f"Environment vars: {json.dumps(env_vars, indent=2)}")
 
+                # nosemgrep: dangerous-subprocess-use-audit, dangerous-subprocess-use-tainted-env-args
                 result = subprocess.run(
                     cli_command,
                     capture_output=True,

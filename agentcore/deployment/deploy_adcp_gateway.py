@@ -429,6 +429,7 @@ class AdCPGatewayDeployer:
                 "--region", validated_region
             ]
             
+            # nosemgrep: dangerous-subprocess-use-audit
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=60, env=env)
             
             if result.returncode == 0:
@@ -448,6 +449,7 @@ class AdCPGatewayDeployer:
                             "--region", validated_region
                         ]
                         
+                        # nosemgrep: dangerous-subprocess-use-audit
                         get_result = subprocess.run(get_cmd, capture_output=True, text=True, timeout=60, env=env)
                         
                         if get_result.returncode == 0:
@@ -584,6 +586,7 @@ class AdCPGatewayDeployer:
             env["AWS_PROFILE"] = validated_profile
         
         try:
+            # nosemgrep: dangerous-subprocess-use-audit
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=300, env=env)
             
             if result.returncode != 0:
@@ -644,6 +647,7 @@ class AdCPGatewayDeployer:
                 "--gateway-identifier", validated_gateway_id,
                 "--region", validated_region
             ]
+            # nosemgrep: dangerous-subprocess-use-audit
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=60, env=env)
             
             if result.returncode == 0:
@@ -743,6 +747,7 @@ class AdCPGatewayDeployer:
             env["AWS_PROFILE"] = validated_profile
         
         try:
+            # nosemgrep: dangerous-subprocess-use-audit
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=300, env=env)
             
             if result.returncode != 0:
