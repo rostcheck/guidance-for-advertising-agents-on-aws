@@ -1224,6 +1224,19 @@ class ManualAgentCoreDeployer:
                         "No A2A configuration found - deploying as standard AgentCore agent"
                     )
 
+                # Add AdCP MCP Gateway URL if available (from deploy-ecosystem.sh)
+                adcp_gateway_url = os.environ.get("ADCP_GATEWAY_URL", "")
+                if adcp_gateway_url:
+                    env_vars["ADCP_GATEWAY_URL"] = adcp_gateway_url
+                    env_vars["ADCP_USE_MCP"] = "true"
+                    logger.info(f"Adding AdCP MCP Gateway configuration:")
+                    logger.info(f"  ADCP_GATEWAY_URL: {adcp_gateway_url}")
+                    logger.info(f"  ADCP_USE_MCP: true")
+                else:
+                    logger.info(
+                        "No ADCP_GATEWAY_URL found - agents will use fallback local tools"
+                    )
+
                 # Method B: Manual Deployment with AWS CLI (with 10-minute timeouts)
                 cli_command = [
                     "aws",
@@ -1435,6 +1448,35 @@ class ManualAgentCoreDeployer:
                 # Add AppSync endpoint if available
                 if appsync_endpoint:
                     env_vars["APPSYNC_ENDPOINT"] = appsync_endpoint
+
+                # Add A2A configuration if available (from deploy-ecosystem.sh)
+                if os.environ.get("A2A_BEARER_TOKEN"):
+                    logger.info(
+                        "Adding A2A configuration to runtime environment variables"
+                    )
+                    env_vars["A2A_BEARER_TOKEN"] = os.environ.get("A2A_BEARER_TOKEN")
+                    env_vars["A2A_POOL_ID"] = os.environ.get("A2A_POOL_ID", "")
+                    env_vars["A2A_CLIENT_ID"] = os.environ.get("A2A_CLIENT_ID", "")
+                    env_vars["A2A_DISCOVERY_URL"] = os.environ.get(
+                        "A2A_DISCOVERY_URL", ""
+                    )
+                    env_vars["A2A_PROTOCOL"] = os.environ.get("A2A_PROTOCOL", "A2A")
+                    logger.info(f"  A2A_POOL_ID: {env_vars['A2A_POOL_ID']}")
+                    logger.info(f"  A2A_CLIENT_ID: {env_vars['A2A_CLIENT_ID']}")
+                    logger.info(f"  A2A_DISCOVERY_URL: {env_vars['A2A_DISCOVERY_URL']}")
+
+                # Add AdCP MCP Gateway URL if available (from deploy-ecosystem.sh)
+                adcp_gateway_url = os.environ.get("ADCP_GATEWAY_URL", "")
+                if adcp_gateway_url:
+                    env_vars["ADCP_GATEWAY_URL"] = adcp_gateway_url
+                    env_vars["ADCP_USE_MCP"] = "true"
+                    logger.info(f"Adding AdCP MCP Gateway configuration:")
+                    logger.info(f"  ADCP_GATEWAY_URL: {adcp_gateway_url}")
+                    logger.info(f"  ADCP_USE_MCP: true")
+                else:
+                    logger.info(
+                        "No ADCP_GATEWAY_URL found - agents will use fallback local tools"
+                    )
 
                 # Use AWS CLI with 10-minute timeouts for update operations
                 cli_command = [

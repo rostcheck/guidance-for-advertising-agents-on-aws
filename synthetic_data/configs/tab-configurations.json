@@ -1,7 +1,7 @@
 {
   "tabConfigurations": {
-    "generic-tab-5": {
-      "id": "generic-tab-5",
+    "generic-tab-1": {
+      "id": "generic-tab-1",
       "title": "Campaign Management Portal",
       "description": "Agentic Advertising Ecosystem Dashboard",
       "icon": "campaign",
@@ -18,10 +18,10 @@
       "scenarios": [
         {
           "id": "advertiser-campaign-brief",
-          "title": "Advertiser Campaign Brief Submission (A2A)",
-          "description": "Submit a campaign brief from Advertiser Agent to Agency Agent using A2A protocol for reasoning and negotiation.",
+          "title": "Advertiser Campaign Brief Submission",
+          "description": "Submit a campaign brief from Advertiser Agent to Agency Agent for reasoning and negotiation.",
           "query": "I need to submit a campaign brief for Acme Energy's new sustainable solar panel product launch. Our objectives are: build brand awareness among environmentally conscious homeowners aged 35-55, drive consideration for residential solar solutions, and establish thought leadership in clean energy. Budget is $2M for Q1 2025, targeting CTV and online video channels. We require tier_1 brand safety and want a brand lift measurement study. Please coordinate with the Agency Agent to develop a comprehensive media plan.",
-          "category": "Agentic Advertising - A2A Protocol",
+          "category": "Media Buy Automation",
           "agentType": "AdvertiserAgent"
         },
         {
@@ -29,7 +29,7 @@
           "title": "Agency Agent Orchestration & AdCP Discovery",
           "description": "Agency Agent coordinates multi-agent workflow using AdCP Media Buy Protocol for inventory discovery.",
           "query": "As the Agency Agent for Acme Energy's $2M sustainable energy campaign, I need to orchestrate the complete campaign workflow. First, use AdCP get_products to discover premium CTV inventory from ESPN, Fox Sports, and YouTube that aligns with environmental content. Target sports enthusiasts interested in sustainability. Then coordinate with Signal Agent for audience targeting, Identity Agent for reach estimation, and Verification Agent for brand safety verification before presenting the media plan to the Advertiser Agent for approval.",
-          "category": "Agentic Advertising - AdCP Protocol",
+          "category": "Media Buy Automation",
           "agentType": "AgencyAgent"
         },
         {
@@ -37,7 +37,7 @@
           "title": "Signal Agent Discovery & Activation via AdCP",
           "description": "Signal Agent discovers and activates audience segments using AdCP Signals Protocol.",
           "query": "Use AdCP Signals Protocol to discover audience segments for environmentally conscious homeowners interested in sustainable technology. Search for segments from LiveRamp, Oracle Data Cloud, and Experian that match our target: household income $75k+, ages 35-55, interest in clean energy and home improvement. Once identified, activate the best-matching segments on The Trade Desk platform for our Acme Energy campaign. Return the DSP segment IDs for targeting.",
-          "category": "Agentic Advertising - AdCP Signals",
+          "category": "Media Buy Automation",
           "agentType": "SignalAgent"
         },
         {
@@ -45,23 +45,23 @@
           "title": "Identity Agent Cross-Device Reach Estimation (MCP)",
           "description": "Identity Agent provides deterministic reach estimation using MCP protocol.",
           "query": "Using MCP protocol, estimate the deduplicated cross-device reach for our Acme Energy campaign. We're targeting the 'environmentally conscious homeowners' segment across CTV, mobile, and desktop channels. Calculate household-level reach using UID2 and RampID identity graphs. Provide frequency cap recommendations and privacy-compliant token resolution for our $2M budget allocation across 45 days.",
-          "category": "Agentic Advertising - MCP Protocol",
+          "category": "Media Buy Automation",
           "agentType": "IdentityAgent"
         },
         {
           "id": "verification-brand-safety",
-          "title": "Verification Agent Brand Safety & Quality Assurance (MCP + A2A)",
-          "description": "Verification Agent performs brand safety verification using MCP and alerts via A2A.",
+          "title": "Verification Agent Brand Safety & Quality Assurance (MCP)",
+          "description": "Verification Agent performs brand safety verification using MCP and alerts.",
           "query": "Verify brand safety for our Acme Energy campaign placements using MCP protocol. Check the following publisher properties: ESPN.com, FoxSports.com, YouTube environmental documentaries, and streaming fitness content. Apply tier_1 brand safety standards. Flag any properties with brand safety scores below 90 or fraud risk above 5%. If any incidents are detected, prepare an A2A alert for the Agency Agent with investigation details and recommended actions.",
-          "category": "Agentic Advertising - MCP + A2A",
+          "category": "Media Buy Automation",
           "agentType": "VerificationAgent"
         },
         {
           "id": "measurement-brand-lift",
-          "title": "Measurement Agent Brand Lift Study Configuration (MCP + A2A)",
-          "description": "Measurement Agent configures brand lift study using MCP and reports results via A2A.",
+          "title": "Measurement Agent Brand Lift Study Configuration (MCP)",
+          "description": "Measurement Agent configures brand lift study using MCP and reports results.",
           "query": "Configure a brand lift study for Acme Energy's Q1 2025 campaign using MCP protocol. Study parameters: measure brand awareness, ad recall, and purchase intent among environmentally conscious homeowners. Use Lucid as the measurement provider with a control/exposed methodology. Budget $8,000 for the study. Once configured, prepare interim and final reports to be delivered to the Agency Agent via A2A protocol with actionable insights on creative performance.",
-          "category": "Agentic Advertising - MCP + A2A",
+          "category": "Measurement",
           "agentType": "MeasurementAgent"
         },
         {
@@ -69,39 +69,39 @@
           "title": "Publisher Agent Media Buy Creation & Delivery (AdCP)",
           "description": "Publisher Agent creates media buy packages and tracks delivery using AdCP Media Buy Protocol.",
           "query": "As Publisher Agent for ESPN Premium CTV inventory, process the incoming media buy request from Agency Agent using AdCP Media Buy Protocol. Create a media buy package for Acme Energy with: $500,000 budget allocation, premium sports documentary placements, 30-second video format, tier_1 brand safety, and environmental content alignment. Confirm creative deadlines, provide delivery projections, and set up real-time delivery tracking. Return the media_buy_id and package confirmation.",
-          "category": "Agentic Advertising - AdCP Media Buy",
+          "category": "Media Buy Automation",
           "agentType": "PublisherAgent"
         },
         {
           "id": "complete-campaign-flow",
           "title": "Complete Agentic Campaign Flow Integration",
-          "description": "End-to-end demonstration of all seven agents coordinating via A2A, AdCP, and MCP protocols.",
+          "description": "End-to-end demonstration of all seven agents coordinating, AdCP, and MCP protocols.",
           "query": "Execute the complete agentic advertising workflow for Acme Energy's $2M sustainable energy campaign: 1) Receive campaign brief from Advertiser Agent (A2A), 2) Discover inventory via Publisher Agent (AdCP Media Buy), 3) Find audience segments via Signal Agent (AdCP Signals), 4) Estimate reach via Identity Agent (MCP), 5) Verify brand safety via Verification Agent (MCP), 6) Configure measurement via Measurement Agent (MCP), 7) Present media plan to Advertiser Agent for approval (A2A), 8) Execute campaign via Publisher Agent (AdCP). Coordinate all agents and report status at each step.",
-          "category": "Agentic Advertising - Full Workflow",
+          "category": "Media Buy Automation",
           "agentType": "AgencyAgent"
         },
         {
           "id": "agency-publisher-negotiation",
-          "title": "Agency-Publisher Rate Negotiation (A2A)",
-          "description": "Agency and Publisher Agents negotiate premium inventory rates using A2A protocol.",
+          "title": "Agency-Publisher Rate Negotiation",
+          "description": "Agency and Publisher Agents negotiate premium inventory rates using.",
           "query": "Initiate A2A negotiation with Publisher Agent for premium NFL Playoff inventory. Our Acme Energy campaign needs 50M impressions during the playoff window, but current CPMs of $48.90 exceed our $42 target. Propose a volume commitment deal: guaranteed $1.2M spend in exchange for $42 CPM floor and first-look rights on environmental documentary inventory. Include brand safety guarantees and delivery commitments in the negotiation.",
-          "category": "Agentic Advertising - A2A Negotiation",
+          "category": "Media Buy Automation",
           "agentType": "AgencyAgent"
         },
         {
           "id": "verification-incident-alert",
-          "title": "Verification Agent Incident Alert & Investigation (A2A)",
-          "description": "Verification Agent detects brand safety incident and escalates via A2A protocol.",
+          "title": "Verification Agent Incident Alert & Investigation",
+          "description": "Verification Agent detects brand safety incident and escalates via.",
           "query": "ALERT: Brand safety incident detected on YouTube placement for Acme Energy campaign. A video in our environmental documentary targeting was flagged for controversial climate content that conflicts with brand guidelines. Current brand safety score dropped from 96 to 78. Prepare A2A incident report for Agency Agent including: incident details, affected impressions (estimated 125,000), recommended immediate actions (pause placement, exclude content category), and investigation timeline. Request acknowledgment and escalation decision.",
-          "category": "Agentic Advertising - A2A Alerts",
+          "category": "Campaign Optimization",
           "agentType": "VerificationAgent"
         },
         {
           "id": "measurement-interim-report",
-          "title": "Measurement Agent Interim Results Report (A2A)",
-          "description": "Measurement Agent delivers interim brand lift results via A2A protocol.",
-          "query": "Deliver Week 2 interim brand lift report for Acme Energy campaign via A2A protocol to Agency Agent. Results show: +28% brand awareness lift (target: 25%), +18% ad recall (target: 20%), +12% purchase intent (target: 15%). Key insight: 30-second creative format showing 2x lift compared to 15-second spots. Environmental documentary placements outperforming sports content by 34%. Recommend budget reallocation from sports to documentary inventory. Request Agency Agent feedback on optimization recommendations.",
-          "category": "Agentic Advertising - A2A Reports",
+          "title": "Measurement Agent Interim Results Report",
+          "description": "Measurement Agent delivers interim brand lift results.",
+          "query": "Deliver Week 2 interim brand lift report for Acme Energy campaign to Agency Agent. Results show: +28% brand awareness lift (target: 25%), +18% ad recall (target: 20%), +12% purchase intent (target: 15%). Key insight: 30-second creative format showing 2x lift compared to 15-second spots. Environmental documentary placements outperforming sports content by 34%. Recommend budget reallocation from sports to documentary inventory. Request Agency Agent feedback on optimization recommendations.",
+          "category": "Measurement",
           "agentType": "MeasurementAgent"
         },
         {
@@ -109,23 +109,23 @@
           "title": "ARTF Container Bid Enrichment Flow",
           "description": "Identity and Verification Agents enrich bid requests via ARTF containers in exchange infrastructure.",
           "query": "Explain the ARTF (Ad Request Transform Framework) container flow for real-time bid enrichment. When a bid request enters the exchange: 1) Identity Container adds UID2 tokens, RampID, household_id, and device_count for cross-device targeting, 2) Verification Container adds brand_safety_score, ivt_risk (fraud detection), and viewability_prediction. Show how these enriched signals flow to DSPs for better targeting and brand safety decisions. This is infrastructure-level processing, not direct agent communication.",
-          "category": "Agentic Advertising - ARTF Infrastructure",
+          "category": "Bid Enrichment",
           "agentType": "IdentityAgent"
         },
         {
           "id": "advertiser-approval-workflow",
-          "title": "Advertiser Agent Media Plan Approval (A2A)",
-          "description": "Advertiser Agent reviews and approves media plan from Agency Agent via A2A protocol.",
+          "title": "Advertiser Agent Media Plan Approval",
+          "description": "Advertiser Agent reviews and approves media plan from Agency Agent",
           "query": "Review the media plan submitted by Agency Agent for Acme Energy Q1 2025 campaign. Plan includes: $2M total budget, 60% CTV ($1.2M), 40% online video ($800K), targeting environmentally conscious homeowners 35-55, tier_1 brand safety, brand lift study included. Projected reach: 2.1M households, 78% match rate, estimated +25% brand awareness lift. Evaluate against our objectives and brand guidelines. Provide approval decision with any modifications or clarifying questions via A2A response.",
-          "category": "Agentic Advertising - A2A Approval",
+          "category": "Media Buy Automation",
           "agentType": "AdvertiserAgent"
         },
         {
           "id": "signal-segment-performance",
-          "title": "Signal Agent Segment Performance Analysis",
+          "title": "Signal Agent Segment Performance Analysis (UCP, MCP)",
           "description": "Signal Agent analyzes activated segment performance and recommends optimizations.",
           "query": "Analyze performance of activated audience segments for Acme Energy campaign after Week 1. Segments activated: lr_exp_homeowners_eco (LiveRamp), oracle_green_tech_intenders, experian_solar_considerers. Compare conversion rates, CPAs, and brand lift contribution across segments. Identify top-performing segment for budget reallocation. Recommend new lookalike segments to test based on converter profiles. Prepare optimization recommendations for Agency Agent.",
-          "category": "Agentic Advertising - Signal Optimization",
+          "category": "Measurement",
           "agentType": "SignalAgent"
         },
         {
@@ -138,10 +138,10 @@
         },
         {
           "id": "agency-budget-reallocation",
-          "title": "Agency Agent Budget Reallocation Request (A2A)",
-          "description": "Agency Agent requests budget reallocation approval from Advertiser Agent via A2A.",
-          "query": "Based on Week 2 performance data, I'm requesting budget reallocation approval from Advertiser Agent via A2A protocol. Recommendation: shift $200K from sports content (underperforming at 0.8% CVR) to environmental documentaries (outperforming at 1.4% CVR). This reallocation is projected to improve overall campaign CPA by 18% and increase brand lift by 6 percentage points. Measurement Agent data supports this recommendation. Requesting approval within 24 hours to optimize remaining campaign flight.",
-          "category": "Agentic Advertising - A2A Budget",
+          "title": "Agency Agent Budget Reallocation Request",
+          "description": "Agency Agent requests budget reallocation approval from Advertiser Agent.",
+          "query": "Based on Week 2 performance data, I'm requesting budget reallocation approval from Advertiser Agent. Recommendation: shift $200K from sports content (underperforming at 0.8% CVR) to environmental documentaries (outperforming at 1.4% CVR). This reallocation is projected to improve overall campaign CPA by 18% and increase brand lift by 6 percentage points. Measurement Agent data supports this recommendation. Requesting approval within 24 hours to optimize remaining campaign flight.",
+          "category": "Campaign Optimization",
           "agentType": "AgencyAgent"
         }
       ],
@@ -203,7 +203,7 @@
             "ctr": 0.016,
             "cvr": 0.015,
             "impressions": 45000000,
-            "brandLift": 0.20
+            "brandLift": 0.2
           }
         }
       ],
@@ -692,8 +692,8 @@
         ]
       }
     },
-    "generic-tab-1": {
-      "id": "generic-tab-1",
+    "generic-tab-2": {
+      "id": "generic-tab-2",
       "title": "Streaming Inventory Planning",
       "description": "Premium Content Monetization Strategy",
       "icon": "live_tv",

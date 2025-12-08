@@ -27,7 +27,7 @@ from shared.response_model import (
     ResponseModel,
 )
 from shared.image_generator import generate_image_from_descriptions
-from shared.adcp_tools import ADCP_TOOLS
+from shared.adcp_tools import ADCP_TOOLS, get_adcp_mcp_tools
 import re
 
 # Add the parent directory to path for shared imports
@@ -901,13 +901,15 @@ def create_agent(agent_name, conversation_context, is_collaborator):
     ]
     
     # Add AdCP tools for ecosystem agents that need them
+    # These wrapper tools call the MCP gateway directly with correct prefixed tool names
     ADCP_ENABLED_AGENTS = [
         "AgencyAgent", "AdvertiserAgent", "PublisherAgent", 
         "SignalAgent", "VerificationAgent", "MeasurementAgent", "IdentityAgent"
     ]
     if agent_name in ADCP_ENABLED_AGENTS:
-        tools.extend(ADCP_TOOLS)
-        logger.info(f"🔧 CREATE_AGENT: Added AdCP tools for {agent_name}")
+        adcp_tools = get_adcp_mcp_tools()
+        tools.extend(adcp_tools)
+        logger.info(f"🔧 CREATE_AGENT: Added {len(adcp_tools)} AdCP tools for {agent_name}")
     
     collaborator_config = get_collaborator_agent_config(
         agent_name=agent_name, orchestrator_name=orchestrator_instance.agent_name
@@ -1757,13 +1759,15 @@ class GenericAgent:
             ]
             
             # Add AdCP tools for ecosystem agents that need them
+            # These wrapper tools call the MCP gateway directly with correct prefixed tool names
             ADCP_ENABLED_AGENTS = [
                 "AgencyAgent", "AdvertiserAgent", "PublisherAgent", 
                 "SignalAgent", "VerificationAgent", "MeasurementAgent", "IdentityAgent"
             ]
             if agent_name in ADCP_ENABLED_AGENTS:
-                tools.extend(ADCP_TOOLS)
-                logger.info(f"🔧 CREATE_ORCHESTRATOR: Added AdCP tools for {agent_name}")
+                adcp_tools = get_adcp_mcp_tools()
+                tools.extend(adcp_tools)
+                logger.info(f"🔧 CREATE_ORCHESTRATOR: Added {len(adcp_tools)} AdCP tools for {agent_name}")
         except Exception as e:
             logger.error(f"✗ Failed to build tools list: {e}")
 

@@ -813,6 +813,14 @@ if [ -n "$EXISTING_RUNTIME_ID" ] && [ "$EXISTING_RUNTIME_ID" != "None" ] && [ "$
     # Add channel namespace
     ENV_VARS="${ENV_VARS},\"APPSYNC_CHANNEL_NAMESPACE\":\"${APPSYNC_CHANNEL_NAMESPACE}\""
     
+    # Add AdCP MCP Gateway URL if available
+    if [ -n "$ADCP_GATEWAY_URL_VALUE" ] && [ "$ADCP_GATEWAY_URL_VALUE" != "None" ]; then
+        ENV_VARS="${ENV_VARS},\"ADCP_GATEWAY_URL\":\"${ADCP_GATEWAY_URL_VALUE}\",\"ADCP_USE_MCP\":\"true\""
+        print_status "Adding AdCP Gateway URL to runtime environment: $ADCP_GATEWAY_URL_VALUE"
+    else
+        print_warning "AdCP Gateway URL not available - agents will use fallback local tools"
+    fi
+    
     ENV_VARS="${ENV_VARS}}"
     
     if [ -n "$AWS_PROFILE" ]; then
@@ -866,6 +874,12 @@ else
     export AGENTCORE_REGION="$AGENTCORE_REGION"
     if [ -n "$AWS_PROFILE" ]; then
         export AWS_PROFILE="$AWS_PROFILE"
+    fi
+    
+    # Export AdCP Gateway URL for deploy_agentcore_manual.py to pick up
+    if [ -n "$ADCP_GATEWAY_URL_VALUE" ] && [ "$ADCP_GATEWAY_URL_VALUE" != "None" ]; then
+        export ADCP_GATEWAY_URL="$ADCP_GATEWAY_URL_VALUE"
+        print_status "Exporting ADCP_GATEWAY_URL for runtime deployment: $ADCP_GATEWAY_URL_VALUE"
     fi
 
     # Install deployment requirements if not already installed

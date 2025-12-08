@@ -4,6 +4,9 @@ AdCP MCP Client Integration for Agentic Advertising Ecosystem
 This module provides MCP client integration for connecting to AdCP MCP servers.
 It supports both local MCP servers (via stdio) and remote MCP Gateways (via HTTP).
 
+IMPORTANT: For AgentCore Gateway connections, this module uses the official
+`mcp-proxy-for-aws` package which handles AWS IAM SigV4 authentication properly.
+
 Usage:
     # For local development with stdio server
     mcp_client = create_adcp_mcp_client(transport="stdio")
@@ -11,8 +14,11 @@ Usage:
     # For AgentCore Gateway (uses AWS IAM SigV4 authentication)
     mcp_client = create_adcp_mcp_client(
         transport="http",
-        gateway_url="https://your-gateway-url.bedrock-agentcore.us-east-1.amazonaws.com"
+        gateway_url="https://your-gateway-url.bedrock-agentcore.us-east-1.amazonaws.com/mcp"
     )
+
+Requirements:
+    pip install mcp-proxy-for-aws strands-agents boto3
 """
 
 import os
@@ -24,25 +30,36 @@ logger = logging.getLogger(__name__)
 # Check if MCP dependencies are available
 MCP_AVAILABLE = False
 SIGV4_AVAILABLE = False
+MCP_PROXY_AVAILABLE = False
 
 try:
     from mcp import stdio_client, StdioServerParameters
-    from mcp.client.streamable_http import streamablehttp_client
     from strands.tools.mcp import MCPClient
     MCP_AVAILABLE = True
 except ImportError:
     logger.warning("MCP dependencies not available. Install with: pip install mcp strands-agents")
 
-# Check if SigV4 dependencies are available for IAM authentication
+# Check if mcp-proxy-for-aws is available (preferred for SigV4 auth)
 try:
-    import boto3
-    from botocore.credentials import Credentials
-    from botocore.auth import SigV4Auth
-    from botocore.awsrequest import AWSRequest
-    import httpx
+    from mcp_proxy_for_aws.client import aws_iam_streamablehttp_client
+    MCP_PROXY_AVAILABLE = True
     SIGV4_AVAILABLE = True
+    logger.info("mcp-proxy-for-aws available for SigV4 authentication")
 except ImportError:
-    logger.warning("SigV4 dependencies not available. Install with: pip install boto3 httpx")
+    logger.warning("mcp-proxy-for-aws not available. Install with: pip install mcp-proxy-for-aws")
+
+# Fallback: Check if basic SigV4 dependencies are available
+if not MCP_PROXY_AVAILABLE:
+    try:
+        import boto3
+        from botocore.credentials import Credentials
+        from botocore.auth import SigV4Auth
+        from botocore.awsrequest import AWSRequest
+        import httpx
+        SIGV4_AVAILABLE = True
+        logger.info("Using fallback SigV4 implementation (boto3/httpx)")
+    except ImportError:
+        logger.warning("SigV4 dependencies not available. Install with: pip install boto3 httpx")
 
 
 def create_adcp_mcp_client(
@@ -82,7 +99,7 @@ def _create_stdio_client(server_path: Optional[str], prefix: str) -> Any:
     if server_path is None:
         # Default to the mock server in synthetic_data
         base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-        server_path = os.path.join(base_dir, "synthetic_data", "mcp_mocks", "adcp_mcp_server.py")
+        server_path = os.path.join(base_dir,"adcp_mcp_server.py")
     
     if not os.path.exists(server_path):
         logger.error(f"MCP server not found at: {server_path}")
@@ -109,6 +126,9 @@ def _create_http_client(gateway_url: Optional[str], auth_token: Optional[str], p
     requests with AWS credentials. This is different from OAuth/Bearer token auth.
     
     The gateway expects requests signed with the 'bedrock-agentcore' service name.
+    
+    IMPORTANT: This function now uses the official `mcp-proxy-for-aws` package
+    which properly handles SigV4 authentication for AWS MCP servers.
     """
     if not gateway_url:
         gateway_url = os.environ.get("ADCP_GATEWAY_URL")
@@ -116,6 +136,10 @@ def _create_http_client(gateway_url: Optional[str], auth_token: Optional[str], p
     if not gateway_url:
         logger.error("Gateway URL required for HTTP transport. Set ADCP_GATEWAY_URL env var.")
         return None
+    
+    # Ensure gateway URL ends with /mcp
+    if not gateway_url.endswith("/mcp"):
+        gateway_url = gateway_url.rstrip("/") + "/mcp"
     
     # Determine region from gateway URL or environment
     region = os.environ.get("AWS_REGION", os.environ.get("AWS_DEFAULT_REGION", "us-east-1"))
@@ -135,27 +159,277 @@ def _create_http_client(gateway_url: Optional[str], auth_token: Optional[str], p
     # Check if we should use SigV4 authentication (default for AgentCore Gateway)
     use_sigv4 = os.environ.get("ADCP_USE_SIGV4", "true").lower() == "true"
     
-    if use_sigv4 and SIGV4_AVAILABLE:
+    if use_sigv4 and MCP_PROXY_AVAILABLE:
+        # Use the official mcp-proxy-for-aws package (RECOMMENDED)
+        return _create_mcp_proxy_client(gateway_url, region, prefix)
+    elif use_sigv4 and SIGV4_AVAILABLE:
+        # Fallback to custom SigV4 implementation
         return _create_sigv4_http_client(gateway_url, region, prefix)
     elif auth_token or os.environ.get("ADCP_AUTH_TOKEN"):
         # Fallback to Bearer token if explicitly provided (for OAuth-based gateways)
-        headers = {}
-        if auth_token:
-            headers["Authorization"] = f"Bearer {auth_token}"
-        elif os.environ.get("ADCP_AUTH_TOKEN"):
-            headers["Authorization"] = f"Bearer {os.environ['ADCP_AUTH_TOKEN']}"
-        
-        logger.warning("Using Bearer token auth instead of SigV4. This may not work with IAM-authenticated gateways.")
-        return MCPClient(
-            lambda: streamablehttp_client(
-                url=gateway_url,
-                headers=headers if headers else None
-            ),
-            prefix=prefix
-        )
+        try:
+            from mcp.client.streamable_http import streamablehttp_client
+            headers = {}
+            if auth_token:
+                headers["Authorization"] = f"Bearer {auth_token}"
+            elif os.environ.get("ADCP_AUTH_TOKEN"):
+                headers["Authorization"] = f"Bearer {os.environ['ADCP_AUTH_TOKEN']}"
+            
+            logger.warning("Using Bearer token auth instead of SigV4. This may not work with IAM-authenticated gateways.")
+            return MCPClient(
+                lambda: streamablehttp_client(
+                    url=gateway_url,
+                    headers=headers if headers else None
+                ),
+                prefix=prefix
+            )
+        except ImportError:
+            logger.error("streamablehttp_client not available")
+            return None
     else:
-        logger.error("SigV4 authentication required but dependencies not available. Install boto3 and httpx.")
+        logger.error("SigV4 authentication required but dependencies not available.")
+        logger.error("Install with: pip install mcp-proxy-for-aws")
         return None
+
+
+def _create_mcp_proxy_client(gateway_url: str, region: str, prefix: str) -> Any:
+    """
+    Create MCP client using the official mcp-proxy-for-aws package.
+    
+    This is the RECOMMENDED approach for connecting to AgentCore Gateway
+    as it properly handles AWS IAM SigV4 authentication.
+    
+    NOTE: We don't use a prefix for gateway connections because the gateway
+    already prefixes tool names with the target name (e.g., 'target___tool_name').
+    Adding another prefix would cause tool name mismatches.
+    """
+    try:
+        from mcp_proxy_for_aws.client import aws_iam_streamablehttp_client
+        
+        service_name = "bedrock-agentcore"
+        
+        logger.info(f"Creating MCP client with mcp-proxy-for-aws")
+        logger.info(f"  Gateway URL: {gateway_url}")
+        logger.info(f"  Region: {region}")
+        logger.info(f"  Service: {service_name}")
+        logger.info(f"  Prefix: None (gateway provides its own prefix)")
+        
+        # Create the MCP client factory using mcp-proxy-for-aws
+        # Note: aws_iam_streamablehttp_client returns an async context manager
+        mcp_client_factory = lambda: aws_iam_streamablehttp_client(
+            endpoint=gateway_url,
+            aws_region=region,
+            aws_service=service_name
+        )
+        
+        # Don't use a prefix for gateway connections - the gateway already
+        # prefixes tool names with the target name
+        return MCPClient(mcp_client_factory)
+        
+    except Exception as e:
+        logger.error(f"Failed to create mcp-proxy-for-aws client: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return None
+
+
+# Global cache for discovered tool names and gateway info
+_gateway_tool_prefix = None
+_gateway_tools_cache = None
+
+
+def discover_gateway_tool_prefix(gateway_url: str, region: str) -> Optional[str]:
+    """
+    Discover the tool name prefix used by the gateway.
+    
+    AgentCore Gateway prefixes tool names with the target name, e.g.:
+    'bbk-adcp-gateway-4208ab-lambda-target___get_products'
+    
+    This function connects to the gateway and discovers the actual prefix.
+    """
+    global _gateway_tool_prefix
+    
+    if _gateway_tool_prefix is not None:
+        return _gateway_tool_prefix
+    
+    try:
+        import asyncio
+        from mcp_proxy_for_aws.client import aws_iam_streamablehttp_client
+        from mcp import ClientSession
+        
+        async def _discover():
+            client = aws_iam_streamablehttp_client(
+                endpoint=gateway_url,
+                aws_region=region,
+                aws_service='bedrock-agentcore'
+            )
+            
+            async with client as (r, w, _):
+                async with ClientSession(r, w) as session:
+                    await session.initialize()
+                    tools = await session.list_tools()
+                    
+                    if tools.tools:
+                        # Extract prefix from first tool name
+                        # Format: prefix___tool_name
+                        first_tool = tools.tools[0].name
+                        if '___' in first_tool:
+                            prefix = first_tool.rsplit('___', 1)[0]
+                            logger.info(f"Discovered gateway tool prefix: {prefix}")
+                            return prefix
+            return None
+        
+        # Run the async discovery
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            # If we're already in an async context, create a new task
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(asyncio.run, _discover())
+                _gateway_tool_prefix = future.result(timeout=30)
+        else:
+            _gateway_tool_prefix = asyncio.run(_discover())
+        
+        return _gateway_tool_prefix
+        
+    except Exception as e:
+        logger.warning(f"Failed to discover gateway tool prefix: {e}")
+        return None
+
+
+def get_gateway_tool_name(base_tool_name: str, gateway_url: str = None, region: str = None) -> str:
+    """
+    Get the full gateway tool name with prefix.
+    
+    Args:
+        base_tool_name: The base tool name (e.g., 'get_products')
+        gateway_url: Gateway URL (uses env var if not provided)
+        region: AWS region (uses env var if not provided)
+    
+    Returns:
+        Full tool name with gateway prefix (e.g., 'bbk-adcp-gateway-4208ab-lambda-target___get_products')
+    """
+    if gateway_url is None:
+        gateway_url = os.environ.get("ADCP_GATEWAY_URL")
+    if region is None:
+        region = os.environ.get("AWS_REGION", "us-east-1")
+    
+    if not gateway_url:
+        return base_tool_name
+    
+    prefix = discover_gateway_tool_prefix(gateway_url, region)
+    if prefix:
+        return f"{prefix}___{base_tool_name}"
+    
+    return base_tool_name
+
+
+async def call_gateway_tool_async(
+    tool_name: str,
+    arguments: dict,
+    gateway_url: str = None,
+    region: str = None
+) -> dict:
+    """
+    Call a gateway tool directly using the same pattern as the working test.
+    
+    This bypasses the MCPClient wrapper and uses ClientSession directly,
+    which is proven to work with the AgentCore Gateway.
+    
+    Args:
+        tool_name: Base tool name (e.g., 'get_products')
+        arguments: Tool arguments
+        gateway_url: Gateway URL (uses env var if not provided)
+        region: AWS region (uses env var if not provided)
+    
+    Returns:
+        Tool result as dict
+    """
+    if gateway_url is None:
+        gateway_url = os.environ.get("ADCP_GATEWAY_URL")
+    if region is None:
+        region = os.environ.get("AWS_REGION", "us-east-1")
+    
+    if not gateway_url:
+        raise ValueError("Gateway URL required. Set ADCP_GATEWAY_URL env var.")
+    
+    # Ensure URL ends with /mcp
+    if not gateway_url.endswith("/mcp"):
+        gateway_url = gateway_url.rstrip("/") + "/mcp"
+    
+    from mcp_proxy_for_aws.client import aws_iam_streamablehttp_client
+    from mcp import ClientSession
+    import json
+    
+    logger.info(f"🔌 Direct gateway call: {tool_name} to {gateway_url}")
+    
+    client = aws_iam_streamablehttp_client(
+        endpoint=gateway_url,
+        aws_region=region,
+        aws_service='bedrock-agentcore'
+    )
+    
+    async with client as (r, w, _):
+        async with ClientSession(r, w) as session:
+            await session.initialize()
+            logger.info(f"✅ Gateway session initialized")
+            
+            # Get the full tool name with prefix
+            full_tool_name = get_gateway_tool_name(tool_name, gateway_url, region)
+            logger.info(f"🔧 Calling tool: {full_tool_name}")
+            
+            result = await session.call_tool(full_tool_name, arguments=arguments)
+            
+            if result.content:
+                text = result.content[0].text
+                logger.info(f"✅ Tool {tool_name} succeeded")
+                try:
+                    return json.loads(text)
+                except json.JSONDecodeError:
+                    return {"text": text}
+            else:
+                logger.warning(f"⚠️ Tool {tool_name} returned empty result")
+                return {"error": "Empty result"}
+
+
+def call_gateway_tool_sync(
+    tool_name: str,
+    arguments: dict,
+    gateway_url: str = None,
+    region: str = None
+) -> dict:
+    """
+    Synchronous wrapper for call_gateway_tool_async.
+    
+    This is the recommended way to call gateway tools from synchronous code.
+    """
+    import asyncio
+    
+    # Filter out None values from arguments - Lambda doesn't accept null for optional params
+    filtered_args = {k: v for k, v in arguments.items() if v is not None}
+    
+    try:
+        # Always use asyncio.run() for clean event loop management
+        # This creates a new event loop each time, avoiding "no current event loop" errors
+        return asyncio.run(
+            call_gateway_tool_async(tool_name, filtered_args, gateway_url, region)
+        )
+    except RuntimeError as e:
+        if "cannot be called from a running event loop" in str(e):
+            # We're in an async context, need to use a thread
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(
+                    asyncio.run,
+                    call_gateway_tool_async(tool_name, filtered_args, gateway_url, region)
+                )
+                return future.result(timeout=60)
+        raise
+    except Exception as e:
+        logger.error(f"❌ Gateway tool call failed: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        raise
 
 
 def _create_sigv4_http_client(gateway_url: str, region: str, prefix: str) -> Any:
@@ -251,14 +525,15 @@ def _create_sigv4_http_client(gateway_url: str, region: str, prefix: str) -> Any
         logger.info(f"Creating SigV4-authenticated MCP client for service '{service_name}' in region '{region}'")
         
         # Create the MCP client with SigV4 transport
+        # Don't use a prefix for gateway connections - the gateway already
+        # prefixes tool names with the target name
         return MCPClient(
             lambda: streamablehttp_client_with_sigv4(
                 url=gateway_url,
                 credentials=botocore_credentials,
                 service=service_name,
                 region=region,
-            ),
-            prefix=prefix
+            )
         )
         
     except Exception as e:

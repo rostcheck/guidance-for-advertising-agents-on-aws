@@ -224,7 +224,7 @@
     </div>
 
             <!-- Metrics Grid Visualization -->
-            <div *ngIf="visualization.type === 'metrics-visualization'" class="metrics-grid-viz">
+            <div *ngIf="visualization.type === 'metrics-visualization' && visualization.metrics&&visualization.metrics.items" class="metrics-grid-viz">
               <h3>{{ visualization.title }}</h3>
               <div class="metrics-grid">
                 <div *ngFor="let item of visualization.metrics.items" class="metric-card">

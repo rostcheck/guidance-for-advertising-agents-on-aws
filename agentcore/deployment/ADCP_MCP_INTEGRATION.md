@@ -321,6 +321,5 @@ If you see `"source": "fallback"` in responses, MCP is not connected:
 |------|---------|
 | `agentcore/deployment/agent/shared/adcp_tools.py` | Main tools with MCP/fallback support |
 | `agentcore/deployment/agent/shared/adcp_mcp_client.py` | MCP client wrapper |
-| `synthetic_data/mcp_mocks/adcp_mcp_server.py` | FastMCP server implementation |
-| `synthetic_data/mcp_mocks/test_adcp_server.py` | Test suite |
+| `agentcore/deployment/agent/shared/adcp_mcp_server.py` | FastMCP server implementation |
 | `agentcore/deployment/deploy_adcp_gateway.py` | Gateway deployment script |

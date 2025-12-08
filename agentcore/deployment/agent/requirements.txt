@@ -29,6 +29,7 @@ uv
 # Knowledge MCP Server Dependencies
 fastmcp
 mcp
+mcp-proxy-for-aws>=0.1.0
 starlette
 uvicorn
 
