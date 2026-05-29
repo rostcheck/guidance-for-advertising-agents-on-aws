@@ -567,20 +567,18 @@ def load_instructions_for_agent(agent_name: str, use_cache: bool = True):
 # Load configuration from file
 def load_configs(file_name, use_cache: bool = True):
     """
-    Load configuration from DynamoDB, S3 bucket, or fall back to local filesystem.
+    Load configuration from DynamoDB.
     
     Priority:
     1. In-memory cache (if use_cache=True)
-    2. DynamoDB AgentConfigTable (fastest)
-    3. S3 bucket: {stack_prefix}-data-{unique_id}/configs/{file_name}
-    4. Local filesystem: {file_name} (relative to handler.py)
+    2. DynamoDB AgentConfigTable
     
     Args:
         file_name: Name of the configuration file (e.g., "global_configuration.json")
         use_cache: Whether to use cached config (default True). Set False to force reload.
         
     Returns:
-        Parsed JSON configuration as dict, or empty dict if not found
+        Parsed JSON configuration as dict
     """
     global _config_cache
     
@@ -589,8 +587,7 @@ def load_configs(file_name, use_cache: bool = True):
         logger.debug(f"📦 CONFIG: Using cached {file_name}")
         return _config_cache[file_name]
     
-    # Try DynamoDB AgentConfigTable first (fastest)
-    # Pass use_cache through to DynamoDB loader - when False, it uses consistent read
+    # Load from DynamoDB
     if file_name == "global_configuration.json":
         config_data = ddb_load_global_config(use_cache=use_cache)
         if config_data is not None:
@@ -598,9 +595,7 @@ def load_configs(file_name, use_cache: bool = True):
             _config_cache[file_name] = config_data
             return config_data
     
-    # DynamoDB is the primary config source - if not found, return empty dict
-    logger.warning(f"⚠️ CONFIG: {file_name} not found in DynamoDB. Check AGENT_CONFIG_TABLE, STACK_PREFIX, UNIQUE_ID env vars and execution role permissions.")
-    return {}
+    raise RuntimeError(f"CONFIG: {file_name} not found in DynamoDB. Check AGENT_CONFIG_TABLE, STACK_PREFIX, UNIQUE_ID env vars and that the AgentConfig table is deployed.")
 
 
 def clear_config_cache(file_name: Optional[str] = None):
@@ -1607,11 +1602,9 @@ def create_agent(agent_name, conversation_context, is_collaborator):
         model_inputs = agent_config.get("model_inputs", {}).get(agent_name, {})
 
     model = BedrockModel(
-        model_id=model_inputs.get(
-            "model_id", "us.anthropic.claude-sonnet-4-20250514-v1:0"
-        ),
-        max_tokens=model_inputs.get("max_tokens", 8000),
-        temperature=model_inputs.get("temperature", 0.8),
+        model_id=model_inputs["model_id"],
+        max_tokens=model_inputs["max_tokens"],
+        temperature=model_inputs["temperature"],
         cache_prompt="default",
         cache_tools="default",
     )
@@ -1781,53 +1774,19 @@ class GenericAgent:
             return Agent()
         self.agent_name = agent_name
         # Load configuration
-        try:
-            config = get_agent_config(agent_name=agent_name)
-            self.team_name = config.get("team_name", "")
-        except Exception as e:
-            config = {
-                "agent_name": agent_name,
-                "agent_display_name": agent_name,
-                "agent_description": "Default agent description",
-                "team_name": "Default team",
-                "use_handler_template": True,
-                "tool_agent_names": [],
-                "external_agents": [],
-                "model_inputs": {
-                    f"{agent_name}": {
-                        "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
-                        "max_tokens": 12000,
-                        "temperature": 0.3
-                    }
-                },
-            }
+        config = get_agent_config(agent_name=agent_name)
+        self.team_name = config.get("team_name", "")
 
         # Extract model inputs
-        try:
-            model_inputs = config.get("model_inputs", {}).get(agent_name, {})
-        except Exception as e:
-            model_inputs = {
-                "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
-                "max_tokens": 12000,
-                "temperature": 0.3
-                }
+        model_inputs = config["model_inputs"][agent_name]
 
-        try:
-            model = BedrockModel(
-                model_id=model_inputs.get(
-                    "model_id", "us.anthropic.claude-sonnet-4-20250514-v1:0"
-                ),
-                max_tokens=model_inputs.get("max_tokens", 12000),
-                cache_prompt="default",
-                cache_tools="default",
-            )
-            if model_inputs.get("temperature"):
-                model.temperature = model_inputs.get("temperature")
-        except Exception as e:
-            logger.error(f"✗ Failed to create Bedrock model: {e}")
-            import traceback
-
-            logger.error(f"   Traceback: {traceback.format_exc()}")
+        model = BedrockModel(
+            model_id=model_inputs["model_id"],
+            max_tokens=model_inputs["max_tokens"],
+            temperature=model_inputs["temperature"],
+            cache_prompt="default",
+            cache_tools="default",
+        )
         # Setup memory hooks
         hooks = []
         self.session_id = session_id

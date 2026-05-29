@@ -69,10 +69,9 @@
             "external_agents": [],
             "model_inputs": {
                 "AdFabricAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 12000,
-                    "temperature": 0.3,
-                    "top_p": 0.8
+                    "temperature": 0.3
                 }
             },
             "agent_tools": [
@@ -100,16 +99,14 @@
             "external_agents": [],
             "model_inputs": {
                 "WeatherImpactAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 12000,
-                    "temperature": 0.3,
-                    "top_p": 0.8
+                    "temperature": 0.3
                 },
                 "AudienceIntelligenceAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 64000,
-                    "temperature": 0.3,
-                    "top_p": 0.8
+                    "temperature": 0.3
                 }
             },
             "color": "#804294FF",
@@ -133,27 +130,24 @@
             "external_agents": [],
             "model_inputs": {
                 "MediaPlanningAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 64000,
                     "temperature": 0.3
                 },
                 "AudienceIntelligenceAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 64000,
-                    "temperature": 0.3,
-                    "top_p": 0.8
+                    "temperature": 0.3
                 },
                 "FormatStrategyOptimizerAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 64000,
-                    "temperature": 0.3,
-                    "top_p": 0.8
+                    "temperature": 0.3
                 },
                 "TimingStrategyAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 64000,
-                    "temperature": 0.3,
-                    "top_p": 0.8
+                    "temperature": 0.3
                 }
             },
             "agent_tools": [
@@ -185,27 +179,24 @@
             "external_agents": [],
             "model_inputs": {
                 "YieldOptimizationAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 12000,
                     "temperature": 0.3
                 },
                 "AudienceIntelligenceAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 8000,
-                    "temperature": 0.3,
-                    "top_p": 0.8
+                    "temperature": 0.3
                 },
                 "FormatStrategyOptimizerAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 8000,
-                    "temperature": 0.3,
-                    "top_p": 0.95
+                    "temperature": 0.3
                 },
                 "TimingStrategyAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 8000,
-                    "temperature": 0.3,
-                    "top_p": 0.95
+                    "temperature": 0.3
                 }
             },
             "build_timestamp": "2025-10-16T01:48:05.020928Z",
@@ -241,39 +232,34 @@
             "use_handler_template": false,
             "model_inputs": {
                 "CampaignOptimizationAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 12000,
                     "temperature": 0.3
                 },
                 "AudienceStrategyAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 8000,
-                    "temperature": 0.3,
-                    "top_p": 0.95
+                    "temperature": 0.3
                 },
                 "ChannelMixOptimizationAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 8000,
-                    "temperature": 0.3,
-                    "top_p": 0.95
+                    "temperature": 0.3
                 },
                 "CampaignArchitectureAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 8000,
-                    "temperature": 0.3,
-                    "top_p": 0.95
+                    "temperature": 0.3
                 },
                 "CreativeSelectionAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 8000,
-                    "temperature": 0.3,
-                    "top_p": 0.95
+                    "temperature": 0.3
                 },
                 "TimingStrategyAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 8000,
-                    "temperature": 0.3,
-                    "top_p": 0.95
+                    "temperature": 0.3
                 }
             },
             "build_timestamp": "2025-10-16T01:52:31.004603Z",
@@ -303,21 +289,19 @@
             ],
             "model_inputs": {
                 "InventoryOptimizationAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 64000,
                     "temperature": 0.3
                 },
                 "TimingStrategyAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 8000,
-                    "temperature": 0.3,
-                    "top_p": 0.8
+                    "temperature": 0.3
                 },
                 "FormatStrategyOptimizerAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 8000,
-                    "temperature": 0.3,
-                    "top_p": 0.8
+                    "temperature": 0.3
                 }
             },
             "system_prompts": {},
@@ -340,7 +324,7 @@
             "external_agents": [],
             "model_inputs": {
                 "AudienceIntelligenceAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 8000,
                     "temperature": 0.3
                 }
@@ -369,21 +353,19 @@
             "external_agents": [],
             "model_inputs": {
                 "AdLoadOptimizationAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 16000,
                     "temperature": 0.3
                 },
                 "TimingStrategyAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 8000,
-                    "temperature": 0.3,
-                    "top_p": 0.8
+                    "temperature": 0.3
                 },
                 "FormatStrategyOptimizerAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 8000,
-                    "temperature": 0.3,
-                    "top_p": 0.8
+                    "temperature": 0.3
                 }
             },
             "build_timestamp": "2025-10-15T21:36:22.265167Z",
@@ -411,10 +393,9 @@
             "external_agents": [],
             "model_inputs": {
                 "AdFormatSelectorAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 8000,
-                    "temperature": 0.3,
-                    "top_p": 0.8
+                    "temperature": 0.3
                 }
             },
             "agent_tools": [
@@ -432,10 +413,9 @@
             "external_agents": [],
             "model_inputs": {
                 "BidOptimizationAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 8000,
-                    "temperature": 0.3,
-                    "top_p": 0.8
+                    "temperature": 0.3
                 }
             },
             "agent_tools": [
@@ -460,10 +440,9 @@
             "external_agents": [],
             "model_inputs": {
                 "BidSimulatorAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 8000,
-                    "temperature": 0.3,
-                    "top_p": 0.8
+                    "temperature": 0.3
                 }
             },
             "agent_tools": [
@@ -488,10 +467,9 @@
             "external_agents": [],
             "model_inputs": {
                 "ContextualAnalysisAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 8000,
-                    "temperature": 0.3,
-                    "top_p": 0.8
+                    "temperature": 0.3
                 }
             },
             "agent_tools": [
@@ -516,10 +494,9 @@
             "external_agents": [],
             "model_inputs": {
                 "CurrentEventsAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 8000,
-                    "temperature": 0.3,
-                    "top_p": 0.8
+                    "temperature": 0.3
                 }
             },
             "agent_tools": [
@@ -545,10 +522,9 @@
             "external_agents": [],
             "model_inputs": {
                 "EventsAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 8000,
-                    "temperature": 0.3,
-                    "top_p": 0.8
+                    "temperature": 0.3
                 }
             },
             "agent_tools": [
@@ -573,10 +549,9 @@
             "external_agents": [],
             "model_inputs": {
                 "MediaPlanCompiler": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 12000,
-                    "temperature": 0.3,
-                    "top_p": 0.8
+                    "temperature": 0.3
                 }
             },
             "agent_tools": [
@@ -601,10 +576,9 @@
             "external_agents": [],
             "model_inputs": {
                 "AudienceStrategyAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 8000,
-                    "temperature": 0.3,
-                    "top_p": 0.95
+                    "temperature": 0.3
                 }
             },
             "agent_tools": [
@@ -629,10 +603,9 @@
             "external_agents": [],
             "model_inputs": {
                 "ChannelMixOptimizationAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 8000,
-                    "temperature": 0.3,
-                    "top_p": 0.95
+                    "temperature": 0.3
                 }
             },
             "agent_tools": [
@@ -657,10 +630,9 @@
             "external_agents": [],
             "model_inputs": {
                 "CampaignArchitectureAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 8000,
-                    "temperature": 0.3,
-                    "top_p": 0.95
+                    "temperature": 0.3
                 }
             },
             "agent_tools": [
@@ -685,10 +657,9 @@
             "external_agents": [],
             "model_inputs": {
                 "CreativeSelectionAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 8000,
-                    "temperature": 0.3,
-                    "top_p": 0.95
+                    "temperature": 0.3
                 }
             },
             "agent_tools": [
@@ -717,10 +688,9 @@
             "external_agents": [],
             "model_inputs": {
                 "TimingStrategyAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 8000,
-                    "temperature": 0.3,
-                    "top_p": 0.95
+                    "temperature": 0.3
                 }
             },
             "agent_tools": [
@@ -745,10 +715,9 @@
             "external_agents": [],
             "model_inputs": {
                 "FormatStrategyOptimizerAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 8000,
-                    "temperature": 0.3,
-                    "top_p": 0.95
+                    "temperature": 0.3
                 }
             },
             "agent_tools": [
@@ -784,10 +753,9 @@
             },
             "model_inputs": {
                 "AgencyAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 8000,
-                    "temperature": 0.3,
-                    "top_p": 0.9
+                    "temperature": 0.3
                 },
                 "SignalAgent": {
                     "model_id": "global.anthropic.claude-haiku-4-5-20251001-v1:0",
@@ -800,12 +768,12 @@
                     "temperature": 0.3
                 },
                 "AdvertiserAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 4000,
                     "temperature": 0.3
                 },
                 "PublisherAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 4000,
                     "temperature": 0.3
                 }
@@ -841,22 +809,22 @@
             },
             "model_inputs": {
                 "AdvertiserAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 12000,
                     "temperature": 0.3
                 },
                 "MeasurementAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 4000,
                     "temperature": 0.3
                 },
                 "AgencyAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 8000,
                     "temperature": 0.3
                 },
                 "VerificationAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 4000,
                     "temperature": 0.3
                 }
@@ -884,18 +852,17 @@
             },
             "model_inputs": {
                 "PublisherAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 12000,
-                    "temperature": 0.3,
-                    "top_p": 0.9
+                    "temperature": 0.3
                 },
                 "SignalAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 4000,
                     "temperature": 0.3
                 },
                 "VerificationAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 4000,
                     "temperature": 0.3
                 }
@@ -926,10 +893,9 @@
             },
             "model_inputs": {
                 "SignalAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 8000,
-                    "temperature": 0.3,
-                    "top_p": 0.9
+                    "temperature": 0.3
                 }
             },
             "agent_tools": [
@@ -958,10 +924,9 @@
             },
             "model_inputs": {
                 "VerificationAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 8000,
-                    "temperature": 0.3,
-                    "top_p": 0.9
+                    "temperature": 0.3
                 }
             },
             "agent_tools": [
@@ -989,10 +954,9 @@
             },
             "model_inputs": {
                 "MeasurementAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 8000,
-                    "temperature": 0.3,
-                    "top_p": 0.9
+                    "temperature": 0.3
                 }
             },
             "agent_tools": [
@@ -1025,10 +989,9 @@
             },
             "model_inputs": {
                 "IdentityAgent": {
-                    "model_id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                    "model_id": "global.anthropic.claude-sonnet-4-6",
                     "max_tokens": 8000,
-                    "temperature": 0.3,
-                    "top_p": 0.9
+                    "temperature": 0.3
                 }
             },
             "agent_tools": [

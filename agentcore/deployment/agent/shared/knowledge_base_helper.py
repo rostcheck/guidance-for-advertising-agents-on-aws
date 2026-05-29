@@ -368,13 +368,13 @@ class KnowledgeBaseHelper:
                 self.logger.error(f"No knowledge base ID found for agent '{agent}' in GLOBAL_CONFIG or STRANDS_KNOWLEDGE_BASE_ID env var")
                 return None
 
-            # Get the foundation model ARN for generation
-            # Default to Claude 3 Haiku for cost-effective generation
+            # Get the inference profile ARN for generation
             # Use self.region so the ARN matches the deployment region
-            model_arn = os.environ.get(
-                "KB_MODEL_ARN",
-                f"arn:aws:bedrock:{self.region}::foundation-model/anthropic.claude-3-haiku-20240307-v1:0"
-            )
+            model_arn = os.environ.get("KB_MODEL_ARN")
+            if not model_arn:
+                sts = boto3.client("sts", region_name=self.region)
+                account_id = sts.get_caller_identity()["Account"]
+                model_arn = f"arn:aws:bedrock:{self.region}:{account_id}:inference-profile/us.anthropic.claude-3-5-haiku-20241022-v1:0"
 
             # Create bedrock agent runtime client
             bedrock_agent_runtime = boto3.client(
